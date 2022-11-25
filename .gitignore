@@ -1,0 +1,8 @@
+env
+.env
+node_modules
+.env.*
+
+*.lock
+
+nodemon.json
