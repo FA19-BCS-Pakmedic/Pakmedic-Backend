@@ -10,10 +10,10 @@ module.exports = (mongoose) => {
       //this will be replaced with the reference to another collection
       type: [
         {
-          speciality: String,
-          degree: String,
-          university: String,
-          passingYear: String,
+          Speciality: String,
+          Degree: String,
+          University: String,
+          PassingYear: String,
         },
       ],
       required: [true, `${requiredError} qualifications`],

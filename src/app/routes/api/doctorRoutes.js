@@ -30,6 +30,7 @@ const {
   findDoctors,
   addUpdateAbout,
   removeAbout,
+  verifyDoctorPMC,
 } = require("../../controllers/api/doctorController");
 const { verifyPatient } = require("../../controllers/api/patientController");
 
@@ -59,13 +60,13 @@ const router = express.Router();
 /*****************************ROUTES********************************/
 
 // verify doctor pmc id
-router.post("/pmc/verify", [checkDuplicatePmc], verifyDoctor);
+router.post("/pmc/verify", [checkDuplicatePmc], verifyDoctorPMC);
 
 // register a doctor
 router.post(
   "/register",
   [
-    singleFileUpload("avatar", "images", "avatar"),
+    // singleFileUpload("avatar", "images", "avatar"),
     doctorDataValidator,
     checkDuplicateDoctor,
   ],

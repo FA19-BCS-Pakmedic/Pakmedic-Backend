@@ -35,10 +35,10 @@ const doctorSchema = mongoose.Schema({
     type: String,
     required: [true, `${requiredError} phone number`],
   },
-  dob: {
-    type: Date,
-    required: [true, `${requiredError} date of birth`],
-  },
+  // dob: {
+  //   type: Date,
+  //   // required: [true, `${requiredError} date of birth`],
+  // },
   gender: {
     type: String,
     required: [true, `${requiredError} gender`],
@@ -51,7 +51,7 @@ const doctorSchema = mongoose.Schema({
   },
   avatar: {
     type: String,
-    required: [true, `${requiredError} avatar`],
+    // required: [true, `${requiredError} avatar`],
   },
 
   //pmc data

@@ -18,7 +18,7 @@ const {
 // function to validate the doctor information for registration
 module.exports = catchAsync(async (req, res, next) => {
   await body("email").isEmail().withMessage(invalidEmail).run(req);
-  console.log(validationResult(req));
+  // console.log(validationResult(req));
   await body("password")
     .matches(passwordRegex)
     .withMessage(invalidPassword)
@@ -28,15 +28,15 @@ module.exports = catchAsync(async (req, res, next) => {
     .withMessage(invalidStringRegex)
     .run(req);
   await body("phone").matches(phoneRegex).withMessage(invalidPhoneNo).run(req);
-  await body("dob").matches(dateOfBirthRegex).withMessage(invalidDOB).run(req);
+  // await body("dob").matches(dateOfBirthRegex).withMessage(invalidDOB).run(req);
 
   // checking if there are any errors
   const errors = validationResult(req);
   console.log(errors);
   if (errors.errors.length > 0) {
-    if (req.file) {
-      deleteFile(req.file.filename, "images");
-    }
+    // if (req.file) {
+    //   deleteFile(req.file.filename, "images");
+    // }
     return next(new AppError(errors.array()[0].msg, 400));
   }
 

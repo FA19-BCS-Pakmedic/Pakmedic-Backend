@@ -1,10 +1,7 @@
 //npm packages import
 const crypto = require("crypto");
-// const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
-// const { promisify } = require("util");
 const bcrypt = require("bcrypt");
-// const formidable = require("formidable");
 const { validationResult } = require("express-validator");
 const fetch = require("node-fetch");
 
@@ -48,14 +45,18 @@ const db = require("../../models");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
-exports.verifyDoctor = catchAsync(async (req, res, next) => {
+exports.verifyDoctorPMC = catchAsync(async (req, res, next) => {
   const { pmcID } = req.body;
+
+  console.log(req.body);
+
   if (!pmcID) {
     return next(new AppError(invalidPmcID, 400));
   }
   const sendData = {
     RegistrationNo: pmcID,
   };
+
   //   making a post request to the pmc backend to fetch the doctor data
   const response = await fetch(pmcConf.pmcEndPoint, {
     method: "POST",
@@ -63,6 +64,7 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
     headers: { "Content-Type": "application/json" },
   });
   const data = await response.json();
+
   if (data.status == true) {
     return res.status(200).json({
       status: "success",
@@ -70,15 +72,13 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
       message: data.message,
     });
   } else {
-    console.log(data);
-
     return next(new AppError(data.message, 400));
   }
 });
 
 // method to register the doctor
 exports.register = catchAsync(async (req, res, next) => {
-  req.body.avatar = req.file.filename;
+  // req.body.avatar = req.file.filename;
   const isThirdParty = req.body?.isThirdParty;
   ({
     email,
@@ -90,7 +90,7 @@ exports.register = catchAsync(async (req, res, next) => {
     gender,
     location,
     avatar,
-    pmcID,
+    pmcId,
     qualifications,
     issueDate,
     expiryDate,
@@ -104,12 +104,12 @@ exports.register = catchAsync(async (req, res, next) => {
     role,
     name,
     phone,
-    dob: new Date(dob),
+    // dob: new Date(dob),
     gender,
     location,
-    avatar,
+    // avatar,
     pmc: {
-      id: pmcID,
+      id: pmcId,
       qualifications,
       issueDate: new Date(issueDate),
       expiryDate: new Date(expiryDate),

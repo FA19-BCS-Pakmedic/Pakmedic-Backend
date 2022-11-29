@@ -8,10 +8,8 @@ const Doctor = db.doctor;
 
 module.exports = catchAsync(async (req, res, next) => {
   const { pmcID } = req.body;
-  console.log(pmcID);
   let user;
   user = await Doctor.findOne().where("pmc.id").equals(pmcID);
-  console.log(user);
   if (user) {
     return next(new AppError(duplicatePmcID, 400));
   }
