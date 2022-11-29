@@ -40,7 +40,7 @@ module.exports = catchAsync(async (req, res, next) => {
   const errors = validationResult(req);
   console.log(errors);
   if (errors.errors.length > 0) {
-    deleteFile(req.file.filename, "images");
+    // deleteFile(req.file.filename, "images");
     return next(new AppError(errors.array()[0].msg, 400));
   }
 

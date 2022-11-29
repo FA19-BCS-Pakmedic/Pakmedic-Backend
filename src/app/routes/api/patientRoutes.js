@@ -49,7 +49,7 @@ const router = express.Router();
 router.post(
   "/register",
   [
-    singleFileUpload("avatar", "images", "avatar"),
+    // singleFileUpload("avatar", "images", "avatar"),
     patientRegistrationValidator,
     checkDuplicatePatient,
     fetchAddress,

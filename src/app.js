@@ -92,6 +92,12 @@ app.use((req, res, next) => {
 });
 
 // Api endpoints
+
+// app.use("/*", (req, res, next) => {
+//   console.log(req.body);
+//   res.send({ message: "response received" });
+// });
+
 app.use("/api/v1/patients", patient);
 app.use("/api/v1/doctors", doctor);
 app.use("/api/v1/chatbot", chatbot);

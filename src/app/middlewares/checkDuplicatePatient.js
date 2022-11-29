@@ -16,7 +16,7 @@ module.exports = catchAsync(async (req, res, next) => {
     const Patient = db.patient;
     user = await Patient.findOne({ $or: [{ email }, { cnic }] });
     if (user) {
-      deleteFile(req.file.filename, "images");
+      // deleteFile(req.file.filename, "images");
       return next(new AppError(duplicatePatient, 409));
     }
   } else {

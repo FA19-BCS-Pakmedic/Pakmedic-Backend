@@ -41,49 +41,55 @@ const Patient = db.patient;
 
 // method to sign up patient
 exports.register = catchAsync(async (req, res, next) => {
-  req.body.avatar = req.file.filename;
+  // req.body.avatar = req.file.filename;
 
   const isThirdParty = req.body?.isThirdParty;
 
-  const {
-    email,
-    password,
-    role,
-    name,
-    phone,
-    dob,
-    gender,
-    cnic,
-    height,
-    weight,
-    bloodType,
-    avatar,
-    resetPasswordToken,
-    resetPasswordExpiry,
-    address,
-  } = req?.body;
+  // const {
+  //   email,
+  //   password,
+  //   role,
+  //   name,
+  //   phone,
+  //   dob,
+  //   gender,
+  //   cnic,
+  //   height,
+  //   weight,
+  //   bloodType,
+  //   // avatar,
+  //   resetPasswordToken,
+  //   resetPasswordExpiry,
+  //   address,
+  // } = req?.body;
 
   // console.log(coordinates);
 
+  // const patient = new Patient({
+  //   email: req.body.email,
+  //   password: bcrypt.hashSync(req.body.password, 10),
+  //   role: req.body.role,
+  //   name: req.body.name,
+  //   phone: req.body.phone,
+  //   dob: new Date(dob),
+  //   gender,
+  //   cnic,
+  //   // avatar,
+  //   bio: {
+  //     height,
+  //     weight,
+  //     bloodType,
+  //   },
+  //   resetPasswordToken,
+  //   resetPasswordExpiry,
+  //   address,
+  // });
   const patient = new Patient({
-    email,
-    password: bcrypt.hashSync(password, 10),
-    role,
-    name,
-    phone,
-    dob: new Date(dob),
-    gender,
-    cnic,
-    avatar,
-    bio: {
-      height,
-      weight,
-      bloodType,
-    },
-    resetPasswordToken,
-    resetPasswordExpiry,
-    address,
+    ...req.body,
+    password: bcrypt.hashSync(req.body.password, 10),
   });
+
+  console.log(req.body);
 
   // if it is a thirdparty login such as google and facebook
   if (isThirdParty) {
@@ -92,8 +98,8 @@ exports.register = catchAsync(async (req, res, next) => {
   } else {
     // send a verification mail to user's email
     sendMail(
-      email,
-      name,
+      patient?.email,
+      patient?.name,
       getConfCodeEmailTemplate.getVerificationEmailTemplate(
         patient._id,
         "patients"
@@ -103,6 +109,8 @@ exports.register = catchAsync(async (req, res, next) => {
   }
 
   const data = await patient.save();
+
+  console.log(data);
 
   // console.log(req.body);
 

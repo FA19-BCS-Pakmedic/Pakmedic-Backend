@@ -13,7 +13,7 @@ module.exports = catchAsync(async (req, res, next) => {
   if (addressId)
     isUpdated = await updateAddress(addressId, address, city, state, req);
 
-  if (!isUpdated) {
+  if (!isUpdated && address && city) {
     console.log("creating new address");
 
     // fetching latitude and and longitude coordinates of the address
