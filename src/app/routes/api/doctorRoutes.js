@@ -31,6 +31,7 @@ const {
   addUpdateAbout,
   removeAbout,
   verifyDoctorPMC,
+  verifyOTP,
 } = require("../../controllers/api/doctorController");
 const { verifyPatient } = require("../../controllers/api/patientController");
 
@@ -89,6 +90,10 @@ router.patch(
   [check("email", invalidEmail).isEmail()],
   forgotPassword
 );
+
+// verify otp
+router.get("/verify-otp", verifyOTP);
+
 // reset a forgotten password
 router.patch(
   "/reset-forgotten-password",

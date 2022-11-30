@@ -19,6 +19,7 @@ const {
   deletePatient,
   removeProfileImage,
   updateProfileImage,
+  verifyOTP,
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -73,6 +74,10 @@ router.patch(
   [check("email", invalidEmail).isEmail()],
   forgotPassword
 );
+
+// verify otp
+router.get("/verify-otp", verifyOTP);
+
 // reset a forgotten password
 router.patch(
   "/reset-forgotten-password",

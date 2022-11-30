@@ -42,7 +42,7 @@ module.exports = {
   // notLoggedIn: "You are not logged in! Please log in to get access.",
 
   // warning messages
-  tokenExpiry: "token expires in: ",
+  OTPExpiry: "OTP expires in",
 
   // success messages
   databaseConnected: "database is connected",
@@ -56,4 +56,5 @@ module.exports = {
   successfullyUpdated: "successfully updated",
   profileImageUpdated: "profile image was successfully updated",
   profileImageRemoved: "profile image was successfully removed",
+  optSent: "OTP was successfully sent",
 };

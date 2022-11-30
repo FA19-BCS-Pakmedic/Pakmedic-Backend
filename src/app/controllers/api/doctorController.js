@@ -21,7 +21,6 @@ const {
   userRegistered,
   provideEmailPassword,
   incorrectEmailPassword,
-  tokenExpiry,
   passwordUpdateSuccess,
   tokenExpired,
   invalidToken,
@@ -38,6 +37,8 @@ const {
   profileImageUpdated,
   noDoctorsInHospital,
   profileImageRemoved,
+  optSent,
+  OTPExpiry,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
@@ -202,7 +203,35 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     resetToken: resetPasswordToken,
-    message: `${tokenExpiry} 10mins`,
+    message: `${optSent}. ${OTPExpiry} 10mins`,
+  });
+});
+
+//method to verify the otp code sent to the email
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  //get email and otp from req query param
+  const { email, otp } = req.query;
+
+  console.log(email, otp);
+  const doctor = await Doctor.findOne({ email });
+  //if doctor with email does not exist
+  if (!doctor) {
+    return next(new AppError(`doctor ${userNotFoundEmail}`, 404));
+  }
+
+  //if the otp code is incorrect
+  if (doctor.resetPasswordToken.toString() !== otp) {
+    return next(new AppError(invalidToken, 400));
+  }
+
+  //if the otp code has been expired
+  if (doctor.resetPasswordExpiry < Date.now()) {
+    return next(new AppError(tokenExpired, 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "OTP verified",
   });
 });
 
@@ -214,29 +243,31 @@ exports.resetForgottenPassword = catchAsync(async (req, res, next) => {
     return next(new AppError(errors.array()[0].msg, 400));
   }
 
-  const { resetPasswordToken, password } = req.body;
-  const patient = await Doctor.findOne({ resetPasswordToken });
+  const { email, resetPasswordToken, password } = req.body;
+  const doctor = await Doctor.findOne({
+    $and: [{ email }, { resetPasswordToken }],
+  });
 
   // checking token validity
-  if (!patient) {
+  if (!doctor) {
     return next(new AppError(invalidToken, 400));
   }
-  if (patient.resetPasswordExpiry < Date.now()) {
+  if (doctor.resetPasswordExpiry < Date.now()) {
     return next(new AppError(tokenExpired, 400));
   }
 
   // updating password and token fields if the token is valid
-  patient.password = bcrypt.hashSync(password, 10);
-  patient.resetPasswordToken = undefined;
-  patient.resetPasswordExpiry = undefined;
-  await patient.save();
+  doctor.password = bcrypt.hashSync(password, 10);
+  doctor.resetPasswordToken = undefined;
+  doctor.resetPasswordExpiry = undefined;
+  await doctor.save();
   res.status(200).json({
     success: true,
     message: passwordUpdateSuccess,
   });
 });
 
-//reset password if the patient is logged in
+//reset password if the doctor is logged in
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // checking if there are any errors
   const errors = validationResult(req);
@@ -245,15 +276,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   }
   const { email, password, newPassword } = req.body;
 
-  const patient = await Doctor.findOne({ email }).select("+password");
-  if (!patient) {
+  const doctor = await Doctor.findOne({ email }).select("+password");
+  if (!doctor) {
     return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
   }
-  if (!(await matchEncryptions(password, patient.password))) {
+  if (!(await matchEncryptions(password, doctor.password))) {
     return next(new AppError(incorrectPassword, 400));
   }
-  patient.password = bcrypt.hashSync(newPassword, 10);
-  await patient.save();
+  doctor.password = bcrypt.hashSync(newPassword, 10);
+  await doctor.save();
   res.status(200).json({
     success: true,
     message: passwordUpdateSuccess,

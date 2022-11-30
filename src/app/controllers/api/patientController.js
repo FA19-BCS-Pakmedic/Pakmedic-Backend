@@ -21,7 +21,6 @@ const {
   incorrectEmailPassword,
   userNotFoundID,
   userNotFoundEmail,
-  tokenExpiry,
   invalidToken,
   tokenExpired,
   passwordUpdateSuccess,
@@ -33,6 +32,8 @@ const {
   userNotFound,
   profileImageRemoved,
   profileImageUpdated,
+  OTPExpiry,
+  optSent,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
@@ -176,7 +177,37 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     resetToken: resetPasswordToken,
-    message: `${tokenExpiry} 10mins`,
+    message: `${optSent}. ${OTPExpiry} 10mins`,
+  });
+});
+
+//method to verify the otp code sent to the email
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  //get email and otp from req query param
+  const { email, otp } = req.query;
+
+  const patient = await Patient.findOne({ email });
+  //if patient with email does not exist
+
+  console.log(patient);
+
+  if (!patient) {
+    return next(new AppError(`patient ${userNotFoundEmail}`, 404));
+  }
+
+  //if the otp code is incorrect
+  if (patient.resetPasswordToken !== otp) {
+    return next(new AppError(invalidToken, 400));
+  }
+
+  //if the otp code has been expired
+  if (patient.resetPasswordExpiry < Date.now()) {
+    return next(new AppError(tokenExpired, 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "OTP verified",
   });
 });
 
@@ -189,12 +220,19 @@ exports.resetForgottenPassword = catchAsync(async (req, res, next) => {
   }
 
   const { email, resetPasswordToken, password } = req.body;
+
+  console.log(req.body);
   const patient = await Patient.findOne({
-    $$or: [{ email }, { resetPasswordToken }],
+    email: email,
   });
+
+  console.log(patient);
 
   // checking token validity
   if (!patient) {
+    return next(new AppError(`Patient ${userNotFoundEmail}`, 400));
+  }
+  if (patient.resetPasswordToken !== resetPasswordToken) {
     return next(new AppError(invalidToken, 400));
   }
   if (patient.resetPasswordExpiry < Date.now()) {
