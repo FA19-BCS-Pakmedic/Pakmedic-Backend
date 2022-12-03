@@ -45,7 +45,7 @@ const patientSchema = mongoose.Schema({
   },
   cnic: {
     type: String,
-    required: [true, `${requiredError} cnic`],
+    // required: [true, `${requiredError} cnic`],
   },
   address: {
     // replace with address reference

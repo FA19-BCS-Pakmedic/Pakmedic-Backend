@@ -12,7 +12,7 @@ const {
 const {
   invalidEmail,
   invalidPassword,
-  invalidCnic,
+  // invalidCnic,
   invalidStringRegex,
   invalidPhoneNo,
   invalidDOB,
@@ -22,13 +22,16 @@ const {
 module.exports = catchAsync(async (req, res, next) => {
   // console.log("This middle ware is running");
   //   console.log(body("email").isEmail());
+  console.log(req.body);
+
+
   await body("email").isEmail().withMessage(invalidEmail).run(req);
   console.log(validationResult(req));
   await body("password")
     .matches(passwordRegex)
     .withMessage(invalidPassword)
     .run(req);
-  await body("cnic").matches(cnicRegex).withMessage(invalidCnic).run(req);
+  // await body("cnic").matches(cnicRegex).withMessage(invalidCnic).run(req);
   await body("name")
     .matches(stringRegex)
     .withMessage(invalidStringRegex)

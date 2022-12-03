@@ -17,8 +17,10 @@ const {
 
 // function to validate the doctor information for registration
 module.exports = catchAsync(async (req, res, next) => {
+  console.log(req.body);
   await body("email").isEmail().withMessage(invalidEmail).run(req);
   // console.log(validationResult(req));
+
   await body("password")
     .matches(passwordRegex)
     .withMessage(invalidPassword)
