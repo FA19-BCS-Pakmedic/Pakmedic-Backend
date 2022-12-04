@@ -220,7 +220,7 @@ exports.verifyOTP = catchAsync(async (req, res, next) => {
   }
 
   //if the otp code is incorrect
-  if (doctor.resetPasswordToken.toString() !== otp) {
+  if (doctor.resetPasswordToken !== otp) {
     return next(new AppError(invalidToken, 400));
   }
 

@@ -64,15 +64,7 @@ const router = express.Router();
 router.post("/pmc/verify", [checkDuplicatePmc], verifyDoctorPMC);
 
 // register a doctor
-router.post(
-  "/register",
-  [
-    // singleFileUpload("avatar", "images", "avatar"),
-    doctorDataValidator,
-    checkDuplicateDoctor,
-  ],
-  register
-);
+router.post("/register", [doctorDataValidator, checkDuplicateDoctor], register);
 
 // verify user account
 router.get("/verify/:id", verifyDoctor);
@@ -126,13 +118,6 @@ router
   .route("/")
   .patch([doctorDataValidator], updateDoctor)
   .delete([deleteDoctorEmbeddedDocs], deleteDoctor);
-
-// update profile image route
-// router.patch(
-//   "/avatar",
-//   [singleFileUpload("avatar", "images", "avatar")],
-//   updateProfileImage
-// );
 
 router
   .route("/avatar")
