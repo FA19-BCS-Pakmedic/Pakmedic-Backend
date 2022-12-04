@@ -47,15 +47,15 @@ const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
 exports.verifyDoctorPMC = catchAsync(async (req, res, next) => {
-  const { pmcID } = req.body;
+  const { pmcId } = req.body;
 
   console.log(req.body);
 
-  if (!pmcID) {
+  if (!pmcId) {
     return next(new AppError(invalidPmcID, 400));
   }
   const sendData = {
-    RegistrationNo: pmcID,
+    RegistrationNo: pmcId,
   };
 
   //   making a post request to the pmc backend to fetch the doctor data

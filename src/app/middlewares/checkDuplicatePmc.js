@@ -7,9 +7,10 @@ const db = require("../models");
 const Doctor = db.doctor;
 
 module.exports = catchAsync(async (req, res, next) => {
-  const { pmcID } = req.body;
+  console.log(req.body);
+  const { pmcId } = req.body;
   let user;
-  user = await Doctor.findOne().where("pmc.id").equals(pmcID);
+  user = await Doctor.findOne().where("pmc.id").equals(pmcId);
   if (user) {
     return next(new AppError(duplicatePmcID, 400));
   }
