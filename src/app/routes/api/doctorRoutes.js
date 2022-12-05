@@ -1,7 +1,6 @@
 // npm packages import
 const express = require("express");
-// const multer = require("multer");
-// const path = require("path");
+
 const { check } = require("express-validator");
 
 // controller functions import
@@ -33,7 +32,6 @@ const {
   verifyDoctorPMC,
   verifyOTP,
 } = require("../../controllers/api/doctorController");
-const { verifyPatient } = require("../../controllers/api/patientController");
 
 // middleware imports
 const {

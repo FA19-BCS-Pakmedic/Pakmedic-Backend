@@ -18,18 +18,25 @@ const PostSchema = new mongoose.Schema({
   author: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, `${requiredError} author`],
-    ref: "user_type",
+    refPath: "authorType",
   },
-  user_type: {
+  authorType: {
     type: String,
-    enum: Object.values(ROLES),
+    enum: [ROLES.PATIENT, ROLES.DOCTOR],
+    required: [true, `${requiredError} authorType`],
   },
-  comments: [
-    {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Comment",
-    },
-  ],
+
+  // comments: [
+  //   {
+  //     type: [mongoose.Schema.Types.ObjectId],
+  //     ref: "Comment",
+  //   },
+  // ],
+  community: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: [true, `${requiredError} community`],
+    ref: "Community",
+  },
 });
 
 module.exports = mongoose.model("Post", PostSchema);
