@@ -136,13 +136,16 @@ exports.register = catchAsync(async (req, res, next) => {
     );
   }
 
-  const data = await doctor.save();
+  const user = await doctor.save();
 
-  return res.status(201).json({
-    status: "success",
-    data: data,
-    message: `Doctor ${userRegistered}`,
-  });
+  // return res.status(201).json({
+  //   status: "success",
+  //   data: data,
+  //   message: `Doctor ${userRegistered}`,
+  // });
+
+  // 3) If everything ok, send token to client
+  createSendToken(user, 200, req, res);
 });
 
 // method to login the doctor

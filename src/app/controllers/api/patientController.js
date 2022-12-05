@@ -109,15 +109,18 @@ exports.register = catchAsync(async (req, res, next) => {
     );
   }
 
-  const data = await patient.save();
+  const user = await patient.save();
 
-  console.log(data);
+  //  3) If everything ok, send token to client
+  createSendToken(user, 200, req, res);
 
-  // console.log(req.body);
+  // console.log(data);
 
-  res
-    .status(201)
-    .json({ success: true, message: `Patient ${userRegistered}`, data });
+  // // console.log(req.body);
+
+  // res
+  //   .status(201)
+  //   .json({ success: true, message: `Patient ${userRegistered}`, data });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
