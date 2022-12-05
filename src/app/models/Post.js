@@ -22,7 +22,7 @@ const PostSchema = new mongoose.Schema({
   },
   authorType: {
     type: String,
-    enum: [ROLES.PATIENT, ROLES.DOCTOR],
+    enum: Object.values(ROLES),
     required: [true, `${requiredError} authorType`],
   },
 

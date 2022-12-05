@@ -59,7 +59,7 @@ exports.getAllPosts = catchAsync(async (req, res, next) => {
 //get a specific post by id
 exports.getPostById = catchAsync(async (req, res, next) => {
   const postId = req.params.pid;
-  const post = await Post.findByid(postId)
+  const post = await Post.findById(postId)
     .populate("author")
     .populate("community");
 
@@ -104,7 +104,6 @@ exports.updatePost = catchAsync(async (req, res, next) => {
     },
     { new: true }
   );
-  await post.save();
   res.status(200).json({
     status: "success",
     data: {
@@ -115,7 +114,7 @@ exports.updatePost = catchAsync(async (req, res, next) => {
 
 //delete a post
 exports.deletePost = catchAsync(async (req, res, next) => {
-  const postId = req.params.id;
+  const postId = req.params.pid;
 
   const post = await Post.findByIdAndDelete(postId);
 

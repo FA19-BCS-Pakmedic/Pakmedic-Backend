@@ -8,9 +8,7 @@ const {
   getConfCodeEmailTemplate,
   deleteFile,
 } = require("../../utils/helpers");
-const {
-  noCommentsFound,
-} = require("../../utils/constants/RESPONSEMESSAGES");
+const { noCommentsFound } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
 const db = require("../../models");
@@ -20,8 +18,8 @@ const Comment = db.comment;
 
 //add a comment
 exports.addComment = catchAsync(async (req, res, next) => {
-  const { content } = req.body;
-  const postId = req.params.postId;
+  const { content, authorType } = req.body;
+  const postId = req.params.pid;
   const user = req.user;
 
   //add a new comment
@@ -29,6 +27,7 @@ exports.addComment = catchAsync(async (req, res, next) => {
     content: content,
     author: user?._id,
     post: postId,
+    authorType: authorType,
   });
   await comment.save();
 
@@ -42,7 +41,7 @@ exports.addComment = catchAsync(async (req, res, next) => {
 
 //get all comments
 exports.getAllComments = catchAsync(async (req, res, next) => {
-  const comments = await Comment.find();
+  const comments = await Comment.find().populate("author").populate("post");
 
   if (comments.length === 0) {
     return next(new AppError(noCommentsFound, 404));
@@ -58,9 +57,11 @@ exports.getAllComments = catchAsync(async (req, res, next) => {
 
 //get comments for a specific post
 exports.getAllCommentsForPost = catchAsync(async (req, res, next) => {
-  const postId = req.params.postId;
+  const postId = req.params.pid;
 
-  const comments = await Comment.find({ post: postId });
+  const comments = await Comment.find({ post: postId })
+    .populate("author")
+    .populate("post");
 
   //if no comments are found
   if (comments.length === 0) {
@@ -77,7 +78,7 @@ exports.getAllCommentsForPost = catchAsync(async (req, res, next) => {
 
 //delete a comment
 exports.deleteComment = catchAsync(async (req, res, next) => {
-  const commentId = req.params.commentId;
+  const commentId = req.params.cid;
 
   const comment = await Comment.findByIdAndDelete(commentId);
 
