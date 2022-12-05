@@ -31,7 +31,7 @@ router.post("/:cid", addPost);
 router.get("/", getAllPosts);
 
 //get all posts for a specific community
-router.get("/community/:cid", getAllPostsForCommunity);
+router.get("/communities/:cid", getAllPostsForCommunity);
 
 //get a specific post by id
 router.get("/:pid", getPostById);

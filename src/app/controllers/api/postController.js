@@ -59,7 +59,9 @@ exports.getAllPosts = catchAsync(async (req, res, next) => {
 //get a specific post by id
 exports.getPostById = catchAsync(async (req, res, next) => {
   const postId = req.params.pid;
-  const post = await Post.findByid(postId);
+  const post = await Post.findByid(postId)
+    .populate("author")
+    .populate("community");
 
   if (!post) {
     return next(new AppError(noPostsFound, 404));
@@ -76,7 +78,9 @@ exports.getPostById = catchAsync(async (req, res, next) => {
 //get all posts for a specific community
 exports.getAllPostsForCommunity = catchAsync(async (req, res, next) => {
   const communityId = req.params.cid;
-  const posts = await Post.find({ community: communityId });
+  const posts = await Post.find({ community: communityId })
+    .populate("author")
+    .populate("community");
   if (posts.length === 0) {
     return next(new AppError(noPostsFound, 404));
   }
@@ -92,9 +96,14 @@ exports.getAllPostsForCommunity = catchAsync(async (req, res, next) => {
 exports.updatePost = catchAsync(async (req, res, next) => {
   const postId = req.params.pid;
   const { title, content } = req.body;
-  const post = await Post.findById(postId);
-  post.title = title;
-  post.content = content;
+  const post = await Post.findByIdAndUpdate(
+    postId,
+    {
+      title,
+      content,
+    },
+    { new: true }
+  );
   await post.save();
   res.status(200).json({
     status: "success",
