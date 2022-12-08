@@ -277,6 +277,26 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
 });
 
+
+
+//get patient object if he is logged in
+exports.getPatient = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  
+  if(!user) {
+    return next(new AppError(`Patient ${userNotFoundEmail}`, 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "Patient found",
+    data: {
+      user,
+    },
+  });
+});
+
+
+
 /******************************************PATIENT ACCOUNT VERIFICATION FUNCTIONALITY*******************************************/
 // verify patient's account
 exports.verifyPatient = catchAsync(async (req, res, next) => {
@@ -394,7 +414,7 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 });
 
 // get the specific patient data
-exports.getPatient = catchAsync(async (req, res, next) => {
+exports.getPatientById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const patient = await Patient.findById(id).select("+password");
   if (!patient) {

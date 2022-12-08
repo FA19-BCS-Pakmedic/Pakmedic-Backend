@@ -71,7 +71,7 @@ exports.updateCommunity = catchAsync(async (req, res, next) => {
   const data = req.body;
 
   //update community details
-  const community = await Community.findById(
+  const community = await Community.findByIdAndUpdate(
     communityId,
     {
       ...data,
@@ -79,6 +79,7 @@ exports.updateCommunity = catchAsync(async (req, res, next) => {
     { new: true }
   );
 
+  console.log(community);
   if (!community) {
     return next(new AppError(noCommunityFound, 404));
   }

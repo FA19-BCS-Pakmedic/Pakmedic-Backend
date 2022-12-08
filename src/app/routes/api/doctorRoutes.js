@@ -31,6 +31,7 @@ const {
   removeAbout,
   verifyDoctorPMC,
   verifyOTP,
+  getDoctor,
 } = require("../../controllers/api/doctorController");
 
 // middleware imports
@@ -51,7 +52,7 @@ const {
   invalidPassword,
   containOnlyAlphabets,
 } = require("../../utils/constants/RESPONSEMESSAGES");
-const roles = require("../../utils/constants/ROLES");
+const ROLES = require("../../utils/constants/ROLES");
 
 // initializing router
 const router = express.Router();
@@ -98,10 +99,10 @@ router.get("/hospitals", findDoctorsByHospital);
 router.use(verifyToken);
 
 // find doctors
-router.get("/:id", verifyToken, findDoctorById);
-router.get("/", findDoctors);
+router.get("/:id", findDoctorById);
+router.get("/find", findDoctors);
 
-router.use(authorizeRole(roles[1]));
+router.use(authorizeRole(ROLES[1]));
 
 //reset Password
 router.patch("/reset-password", [
@@ -114,6 +115,7 @@ router.patch("/reset-password", [
 // update and delete profile routes
 router
   .route("/")
+  .get(getDoctor)
   .patch([doctorDataValidator], updateDoctor)
   .delete([deleteDoctorEmbeddedDocs], deleteDoctor);
 

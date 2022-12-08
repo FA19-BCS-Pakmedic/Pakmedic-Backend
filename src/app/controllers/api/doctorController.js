@@ -168,6 +168,24 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
+// get doctor if he is logged in
+exports.getDoctor = catchAsync(async (req, res, next) => {
+  const user = req.user;
+
+  console.log("GET DOCTOR METHOD: ", user);
+
+  if (!user) {
+    return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "Doctor found",
+    data: {
+      user,
+    },
+  });
+});
+
 /***********************************PASSWORD RESET FUNCITONALITY ********************************************/
 
 // method to send a verification token to the doctor email (email functionality is yet to be implemented)
