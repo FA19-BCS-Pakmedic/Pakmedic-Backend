@@ -24,13 +24,14 @@ module.exports = catchAsync(async (req, res, next) => {
   //   console.log(body("email").isEmail());
   console.log(req.body);
 
-
   await body("email").isEmail().withMessage(invalidEmail).run(req);
   console.log(validationResult(req));
-  await body("password")
-    .matches(passwordRegex)
-    .withMessage(invalidPassword)
-    .run(req);
+  if (!req.body.isThirdParty) {
+    await body("password")
+      .matches(passwordRegex)
+      .withMessage(invalidPassword)
+      .run(req);
+  }
   // await body("cnic").matches(cnicRegex).withMessage(invalidCnic).run(req);
   await body("name")
     .matches(stringRegex)

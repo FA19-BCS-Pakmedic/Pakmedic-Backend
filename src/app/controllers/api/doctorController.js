@@ -79,8 +79,6 @@ exports.verifyDoctorPMC = catchAsync(async (req, res, next) => {
 
 // method to register the doctor
 exports.register = catchAsync(async (req, res, next) => {
-  // req.body.avatar = req.file.filename;
-  const isThirdParty = req.body?.isThirdParty;
   ({
     email,
     password,
@@ -97,27 +95,54 @@ exports.register = catchAsync(async (req, res, next) => {
     expiryDate,
     status,
     speciality,
+    isThirdParty,
   } = req.body);
 
-  const doctor = new Doctor({
-    email,
-    password: bcrypt.hashSync(password, 10),
-    role,
-    name,
-    phone,
-    // dob: new Date(dob),
-    gender,
-    location,
-    // avatar,
-    pmc: {
-      id: pmcId,
-      qualifications,
-      issueDate: new Date(issueDate),
-      expiryDate: new Date(expiryDate),
-      status,
-    },
-    speciality,
-  });
+  let doctor;
+
+  if (isThirdParty) {
+    doctor = new Doctor({
+      email,
+      // password: bcrypt.hashSync(password, 10),
+      role,
+      name,
+      phone,
+      // dob: new Date(dob),
+      gender,
+      location,
+      // avatar,
+      pmc: {
+        id: pmcId,
+        qualifications,
+        issueDate: new Date(issueDate),
+        expiryDate: new Date(expiryDate),
+        status,
+      },
+      speciality,
+      isThirdParty,
+    });
+  } else {
+    doctor = new Doctor({
+      email,
+      password: bcrypt.hashSync(password, 10),
+      role,
+      name,
+      phone,
+      // dob: new Date(dob),
+      gender,
+      location,
+      // avatar,
+      pmc: {
+        id: pmcId,
+        qualifications,
+        issueDate: new Date(issueDate),
+        expiryDate: new Date(expiryDate),
+        status,
+      },
+      speciality,
+      // isThirdParty,
+    });
+  }
 
   // if it is a thirdparty login such as google and facebook
   if (isThirdParty) {

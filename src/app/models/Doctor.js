@@ -17,7 +17,7 @@ const doctorSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, `${requiredError} password`],
+    // required: [!this.isThirdParty, `${requiredError} password`],
     select: false,
   },
   role: {
@@ -85,6 +85,12 @@ const doctorSchema = mongoose.Schema({
 
   //account verification
   isVerified: {
+    type: Boolean,
+    default: false,
+  },
+
+  //third party authentication
+  isThirdParty: {
     type: Boolean,
     default: false,
   },

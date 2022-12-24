@@ -85,11 +85,18 @@ exports.register = catchAsync(async (req, res, next) => {
   //   resetPasswordExpiry,
   //   address,
   // });
-  const patient = new Patient({
-    ...req.body,
-    password: bcrypt.hashSync(req.body.password, 10),
-  });
 
+  let patient;
+  if (isThirdParty) {
+    patient = new Patient({
+      ...req.body,
+    });
+  } else {
+    patient = new Patient({
+      ...req.body,
+      password: bcrypt.hashSync(req.body.password, 10),
+    });
+  }
   console.log(req.body);
 
   // if it is a thirdparty login such as google and facebook
@@ -277,13 +284,11 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-
-
 //get patient object if he is logged in
 exports.getPatient = catchAsync(async (req, res, next) => {
   const user = req.user;
-  
-  if(!user) {
+
+  if (!user) {
     return next(new AppError(`Patient ${userNotFoundEmail}`, 404));
   }
   res.status(200).json({
@@ -294,8 +299,6 @@ exports.getPatient = catchAsync(async (req, res, next) => {
     },
   });
 });
-
-
 
 /******************************************PATIENT ACCOUNT VERIFICATION FUNCTIONALITY*******************************************/
 // verify patient's account
