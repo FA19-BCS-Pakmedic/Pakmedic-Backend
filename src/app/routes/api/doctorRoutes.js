@@ -72,8 +72,8 @@ router.get("/verify/:id", verifyDoctor);
 router.post("/login", login);
 
 // third party login routes
-router.post("/login/facebook", facebookLogin);
-router.post("/login/google", googleLogin);
+// router.post("/login/facebook", facebookLogin);
+// router.post("/login/google", googleLogin);
 
 // get a validation token to reset a forgotten password
 router.patch(
@@ -99,8 +99,8 @@ router.get("/hospitals", findDoctorsByHospital);
 router.use(verifyToken);
 
 // find doctors
-router.get("/:id", findDoctorById);
 router.get("/find", findDoctors);
+router.get("/:id", findDoctorById);
 
 router.use(authorizeRole(ROLES[1]));
 

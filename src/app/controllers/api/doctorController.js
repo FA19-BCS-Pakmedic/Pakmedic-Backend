@@ -39,6 +39,7 @@ const {
   profileImageRemoved,
   optSent,
   OTPExpiry,
+  unverified,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
@@ -100,49 +101,24 @@ exports.register = catchAsync(async (req, res, next) => {
 
   let doctor;
 
-  if (isThirdParty) {
-    doctor = new Doctor({
-      email,
-      // password: bcrypt.hashSync(password, 10),
-      role,
-      name,
-      phone,
-      // dob: new Date(dob),
-      gender,
-      location,
-      // avatar,
-      pmc: {
-        id: pmcId,
-        qualifications,
-        issueDate: new Date(issueDate),
-        expiryDate: new Date(expiryDate),
-        status,
-      },
-      speciality,
-      isThirdParty,
-    });
-  } else {
-    doctor = new Doctor({
-      email,
-      password: bcrypt.hashSync(password, 10),
-      role,
-      name,
-      phone,
-      // dob: new Date(dob),
-      gender,
-      location,
-      // avatar,
-      pmc: {
-        id: pmcId,
-        qualifications,
-        issueDate: new Date(issueDate),
-        expiryDate: new Date(expiryDate),
-        status,
-      },
-      speciality,
-      // isThirdParty,
-    });
-  }
+  doctor = new Doctor({
+    email,
+    password: isThirdParty ? "" : bcrypt.hashSync(password, 10),
+    role,
+    name,
+    phone,
+    gender,
+    location,
+    pmc: {
+      id: pmcId,
+      qualifications,
+      issueDate: new Date(issueDate),
+      expiryDate: new Date(expiryDate),
+      status,
+    },
+    speciality,
+    isThirdParty: isThirdParty ? isThirdParty : false,
+  });
 
   // if it is a thirdparty login such as google and facebook
   if (isThirdParty) {
@@ -163,32 +139,30 @@ exports.register = catchAsync(async (req, res, next) => {
 
   const user = await doctor.save();
 
-  // return res.status(201).json({
-  //   status: "success",
-  //   data: data,
-  //   message: `Doctor ${userRegistered}`,
-  // });
-
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
 
 // method to login the doctor
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, isThirdParty } = req.body;
 
-  if (!email || !password) {
-    return next(new AppError(provideEmailPassword, 400));
-  }
+  // if (!email || !password) {
+  //   return next(new AppError(provideEmailPassword, 400));
+  // }
+
   const user = await Doctor.findOne({ email }).select("+password");
 
-  console.log(user);
-
-  // Check if user exists && password is correct
-  if (!user || !(await matchEncryptions(password, user.password))) {
+  if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
+  } else if (!user?.isThirdParty) {
+    // Check if user exists && password is correct
+    if (!(await matchEncryptions(password, user.password))) {
+      return next(new AppError(incorrectEmailPassword, 401));
+    }
+  } else if (isThirdParty && !user.isVerified) {
+    return next(new AppError(unverified, 401));
   }
-
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
@@ -210,6 +184,8 @@ exports.getDoctor = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+//method to check whether is already registered and return the
 
 /***********************************PASSWORD RESET FUNCITONALITY ********************************************/
 
@@ -243,9 +219,8 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   doctor.resetPasswordToken = resetPasswordToken;
   doctor.resetPasswordExpiry = resetPasswordExpiry;
 
-  const updatedDoctor = await doctor.save();
+  await doctor.save();
 
-  // console.log(updatedPatient);
   res.status(200).json({
     success: true,
     resetToken: resetPasswordToken,
@@ -357,76 +332,81 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
 });
 
 /********************************************THIRD PARTY AUTHENTICATION FUNCTIONALITY  ******************************************/
-//method to login/singup user using google their google account
-exports.googleLogin = catchAsync(async (req, res, next) => {
-  // const { credentials, role, password } = req.body;
+// //method to login/singup user using google their google account
+// exports.googleLogin = catchAsync(async (req, res, next) => {
+//   // const { credentials, role, password } = req.body;
 
-  const { credentials } = req.body;
+//   const { credentials } = req.body;
 
-  // console.log(jwt_decode(credentials));
+//   // console.log(jwt_decode(credentials));
 
-  const email = jwt_decode(credentials).email;
+//   const email = jwt_decode(credentials).email;
 
-  console.log(email);
+//   console.log(email);
 
-  // socialAuth(req, res, email, role, password);
-  socialAuth(req, res, next, email);
-});
+//   // socialAuth(req, res, email, role, password);
+//   socialAuth(req, res, next, email);
+// });
 
-//method to login/singup user using google auth
-exports.facebookLogin = catchAsync(async (req, res, next) => {
-  // const { accessToken, userID, role, password } = req.body;
-  const { accessToken, userID } = req.body;
-  console.log(accessToken, userID);
+// //method to login/singup user using google auth
+// exports.facebookLogin = catchAsync(async (req, res, next) => {
+//   // const { accessToken, userID, role, password } = req.body;
+//   const { accessToken, userID } = req.body;
+//   console.log(accessToken, userID);
 
-  // fetching the user data from facebook graph api using the userID and accessToken
-  const facebookURL = `https://graph.facebook.com/v14.0/${userID}?fields=name,email&access_token=${accessToken}`;
+//   // fetching the user data from facebook graph api using the userID and accessToken
+//   const facebookURL = `https://graph.facebook.com/v14.0/${userID}?fields=name,email&access_token=${accessToken}`;
 
-  const response = await fetch(facebookURL);
+//   const response = await fetch(facebookURL);
 
-  const data = await response.json();
+//   const data = await response.json();
 
-  console.log(data);
+//   console.log(data);
 
-  const email = data.email;
+//   const email = data.email;
 
-  // socialAuth(req, res, email, role, password);
-  socialAuth(req, res, next, email);
-});
+//   // socialAuth(req, res, email, role, password);
+//   socialAuth(req, res, next, email);
+// });
 
-// social login/signup method that is common for both google and facebook endpoints
-const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
-  const user = await Doctor.findOne({ email });
+// // social login/signup method that is common for both google and facebook endpoints
+// const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
+//   const user = await Doctor.findOne({ email });
 
-  // if client is already registered with the google account we will directly log them in and send an access token to the client
-  // if (user) {
-  //   return createSendToken(user, 200, req, res);
-  // }
+//   // if client is already registered with the google account we will directly log them in and send an access token to the client
+//   // if (user) {
+//   //   return createSendToken(user, 200, req, res);
+//   // }
 
-  if (!user) {
-    return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
-  }
+//   if (!user) {
+//     return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
+//   }
 
-  createSendToken(user, 200, req, res);
+//   createSendToken(user, 200, req, res);
 
-  // // generating a random password if no password is provided from the client
-  // if (!password) {
-  //   password = crypto.randomBytes(10).toString("hex");
-  // }
+//   // // generating a random password if no password is provided from the client
+//   // if (!password) {
+//   //   password = crypto.randomBytes(10).toString("hex");
+//   // }
 
-  // // if client is not registered with the google account we will register them
-  // const newUser = new User({
-  //   email,
-  //   role,
-  //   password: bcrypt.hashSync(password, 10),
-  // });
+//   // // if client is not registered with the google account we will register them
+//   // const newUser = new User({
+//   //   email,
+//   //   role,
+//   //   password: bcrypt.hashSync(password, 10),
+//   // });
 
-  // await newUser.save();
+//   // await newUser.save();
 
-  // res
-  //   .status(200)
-  //   .json({ status: "success", message: "user registered successfully" });
-});
+//   // res
+//   //   .status(200)
+//   //   .json({ status: "success", message: "user registered successfully" });
+// });
+
+// 3rd party auth method
+// const socialAuth = catchAsync(async (req, res, next) => {
+//   console.log("email", req.email);
+// });
 
 /***************************DOCTOR UPDATION AND DELETION OPERATIONS**********************************/
 // method to update doctor details
@@ -483,7 +463,7 @@ exports.deleteDoctor = catchAsync(async (req, res, next) => {
   });
 });
 
-//search doctor by name, location, speciality, and treatments
+//search doctor by name, location, speciality, treatments, email
 exports.findDoctors = catchAsync(async (req, res, next) => {
   const { keyword } = req.body;
   const doctors = await Doctor.find({
@@ -507,6 +487,21 @@ exports.findDoctors = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+//get doctor by email and if the doctor is found then return the doctor data along with the token
+// exports.getDoctorByEmail = catchAsync(async (req, res, next) => {
+//   const { email } = req.body;
+
+//   const doctor = await Doctor.findOne({ email });
+
+//   if (!doctor) {
+//     return next(new AppError(`Doctor ${userNotFound}`, 404));
+//   }
+
+//   createSendToken(doctor, 200, req, res);
+// });
+
+// { email }
 
 // update doctor's profile image by deleting the old and adding the new
 exports.updateProfileImage = catchAsync(async (req, res, next) => {

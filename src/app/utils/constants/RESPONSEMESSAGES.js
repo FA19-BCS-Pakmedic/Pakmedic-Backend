@@ -47,6 +47,9 @@ module.exports = {
 
   // warning messages
   OTPExpiry: "OTP expires in",
+  OTPExpired: "OTP has expired",
+  OTPIncorrect: "OTP is incorrect",
+  unverified: "Your account is not verified",
 
   // success messages
   databaseConnected: "database is connected",

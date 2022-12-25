@@ -34,6 +34,7 @@ const {
   profileImageUpdated,
   OTPExpiry,
   optSent,
+  unverified,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
@@ -45,46 +46,6 @@ exports.register = catchAsync(async (req, res, next) => {
   // req.body.avatar = req.file.filename;
 
   const isThirdParty = req.body?.isThirdParty;
-
-  // const {
-  //   email,
-  //   password,
-  //   role,
-  //   name,
-  //   phone,
-  //   dob,
-  //   gender,
-  //   cnic,
-  //   height,
-  //   weight,
-  //   bloodType,
-  //   // avatar,
-  //   resetPasswordToken,
-  //   resetPasswordExpiry,
-  //   address,
-  // } = req?.body;
-
-  // console.log(coordinates);
-
-  // const patient = new Patient({
-  //   email: req.body.email,
-  //   password: bcrypt.hashSync(req.body.password, 10),
-  //   role: req.body.role,
-  //   name: req.body.name,
-  //   phone: req.body.phone,
-  //   dob: new Date(dob),
-  //   gender,
-  //   cnic,
-  //   // avatar,
-  //   bio: {
-  //     height,
-  //     weight,
-  //     bloodType,
-  //   },
-  //   resetPasswordToken,
-  //   resetPasswordExpiry,
-  //   address,
-  // });
 
   let patient;
   if (isThirdParty) {
@@ -120,32 +81,23 @@ exports.register = catchAsync(async (req, res, next) => {
 
   //  3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
-
-  // console.log(data);
-
-  // // console.log(req.body);
-
-  // res
-  //   .status(201)
-  //   .json({ success: true, message: `Patient ${userRegistered}`, data });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, isThirdParty } = req.body;
 
-  // Check if email and password exist
-  if (!email || !password) {
-    return next(new AppError(provideEmailPassword, 400));
-  }
   const user = await Patient.findOne({ email }).select("+password");
 
-  console.log(user);
-
-  // Check if user exists && password is correct
-  if (!user || !(await matchEncryptions(password, user.password))) {
+  if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
+  } else if (!user?.isThirdParty) {
+    // Check if user exists && password is correct
+    if (!(await matchEncryptions(password, user.password))) {
+      return next(new AppError(incorrectEmailPassword, 401));
+    }
+  } else if (user.isThirdParty && !user.isVerified) {
+    return next(new AppError(unverified, 401));
   }
-
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
