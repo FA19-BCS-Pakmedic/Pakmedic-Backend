@@ -17,4 +17,13 @@ const hospitalSchema = mongoose.Schema({
   },
 });
 
+//pre find hook to populate address
+hospitalSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "address",
+    select: "-__v",
+  });
+  next();
+});
+
 module.exports = mongoose.model("Hospital", hospitalSchema);

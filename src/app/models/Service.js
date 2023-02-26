@@ -34,4 +34,13 @@ const serviceSchema = mongoose.Schema({
   },
 });
 
+//pre find hook to populate hospital
+serviceSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "hospital",
+    select: "-__v",
+  });
+  next();
+});
+
 module.exports = mongoose.model("Service", serviceSchema);

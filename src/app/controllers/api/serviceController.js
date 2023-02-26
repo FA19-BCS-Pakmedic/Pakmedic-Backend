@@ -12,32 +12,38 @@ const Doctor = require("../../models").doctor;
 
 // add service
 exports.addService = catchAsync(async (req, res, next) => {
-  const doctorID = req.decoded.id;
+  console.log("HERE IN ADD SERVICE FUNCTION");
 
-  const { hospital, fee, days, availFrom, availTo, isOnline } = req.body;
+  try {
+    const doctorID = req.user._id;
 
-  const service = new Service({
-    hospital,
-    fee,
-    days,
-    availFrom,
-    availTo,
-    isOnline,
-  });
+    const { hospital, fee, days, availFrom, availTo, isOnline } = req.body;
 
-  const data = await service.save();
+    const service = new Service({
+      hospital,
+      fee,
+      days,
+      availFrom,
+      availTo,
+      isOnline,
+    });
 
-  // save the key from saved experience to the doctor document
-  const doctor = await Doctor.findByIdAndUpdate(doctorID, {
-    $push: { services: data._id },
-  });
+    const data = await service.save();
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      service,
-    },
-  });
+    // save the key from saved experience to the doctor document
+    const doctor = await Doctor.findByIdAndUpdate(doctorID, {
+      $push: { services: data._id },
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        service,
+      },
+    });
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 // get all services
@@ -143,16 +149,19 @@ exports.updateService = catchAsync(async (req, res, next) => {
 
 // delete service
 exports.deleteService = catchAsync(async (req, res, next) => {
+  console.log("HERE IN DELETE SERVICE FUNCTION");
   const id = req.params.id;
-  const docId = req.decoded.id;
-  const service = await Service.findById(id).populate("hospital");
+  const docId = req.user._id;
+  const service = await Service.findById(id);
+
+  console.log(service);
 
   if (!service) {
     return next(new AppError(noExpFound, 404));
   }
 
-  const hospitalID = service.hospital._id;
-  const addressID = service.hospital.address;
+  const hospitalID = service?.hospital?._id;
+  const addressID = service?.hospital?.address;
 
   console.log(service);
 
@@ -162,16 +171,18 @@ exports.deleteService = catchAsync(async (req, res, next) => {
   });
 
   // fetch hospital
-  const hospital = await Hospital.findById(hospitalID);
+  if (hospitalID) {
+    const hospital = await Hospital.findById(hospitalID);
 
-  // delete the image of hospital
-  deleteFile(hospital.image, "images");
+    // delete the image of hospital
+    if (hospital.image) deleteFile(hospital.image, "images");
 
-  // delete the hospital
-  hospital.remove();
+    // delete the hospital
+    hospital.remove();
+  }
 
   // remove address
-  await Address.findByIdAndDelete(addressID);
+  if (addressID) await Address.findByIdAndDelete(addressID);
 
   // remove service
   await service.remove();

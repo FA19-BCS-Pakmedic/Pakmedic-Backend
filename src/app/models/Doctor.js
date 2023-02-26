@@ -110,4 +110,16 @@ const doctorSchema = mongoose.Schema({
   },
 });
 
+// pre function to prepopulate before find query
+doctorSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "experiences",
+    select: "-__v",
+  }).populate({
+    path: "services",
+    select: "-__v",
+  });
+  next();
+});
+
 module.exports = mongoose.model(`Doctor`, doctorSchema);
