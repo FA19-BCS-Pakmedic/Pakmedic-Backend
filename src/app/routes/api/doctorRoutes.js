@@ -116,7 +116,8 @@ router.patch("/reset-password", [
 router
   .route("/")
   .get(getDoctor)
-  .patch([doctorDataValidator], updateDoctor)
+  // .patch([doctorDataValidator], updateDoctor)
+  .patch(updateDoctor)
   .delete([deleteDoctorEmbeddedDocs], deleteDoctor);
 
 router

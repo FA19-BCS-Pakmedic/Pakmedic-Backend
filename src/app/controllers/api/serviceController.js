@@ -14,36 +14,39 @@ const Doctor = require("../../models").doctor;
 exports.addService = catchAsync(async (req, res, next) => {
   console.log("HERE IN ADD SERVICE FUNCTION");
 
-  try {
-    const doctorID = req.user._id;
+  const doctorID = req.user._id;
 
-    const { hospital, fee, days, availFrom, availTo, isOnline } = req.body;
+  const { hospital, fee, days, availFrom, availTo, isOnline } = req.body;
 
-    const service = new Service({
-      hospital,
-      fee,
-      days,
-      availFrom,
-      availTo,
-      isOnline,
-    });
+  const service = new Service({
+    hospital,
+    fee,
+    days,
+    availFrom,
+    availTo,
+    isOnline,
+  });
 
-    const data = await service.save();
+  const data = await service.save();
 
-    // save the key from saved experience to the doctor document
-    const doctor = await Doctor.findByIdAndUpdate(doctorID, {
+  // save the key from saved experience to the doctor document
+  const doctor = await Doctor.findByIdAndUpdate(
+    doctorID,
+    {
       $push: { services: data._id },
-    });
+    },
+    { new: true }
+  );
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        service,
-      },
-    });
-  } catch (err) {
-    console.log(err);
-  }
+  console.log(doctor);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      service,
+      user: doctor,
+    },
+  });
 });
 
 // get all services
@@ -128,6 +131,8 @@ exports.getSpecificDoctorServices = catchAsync(async (req, res, next) => {
 exports.updateService = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const data = req.body;
+
+  const doctorID = req.user._id;
   const service = await Service.findByIdAndUpdate(
     id,
     { $set: data },
@@ -136,13 +141,16 @@ exports.updateService = catchAsync(async (req, res, next) => {
   if (!service) {
     return next(new AppError(noExpFound, 404));
   }
+
+  const doctor = await Doctor.findById(doctorID);
   // service.title = title;
   // service.hospital = hospital;
-  await service.save();
+  // await service.save();
   res.status(200).json({
     status: "success",
     data: {
       service,
+      user: doctor,
     },
   });
 });
@@ -157,18 +165,24 @@ exports.deleteService = catchAsync(async (req, res, next) => {
   console.log(service);
 
   if (!service) {
-    return next(new AppError(noExpFound, 404));
+    return next(new AppError(noServiceFound, 404));
   }
 
   const hospitalID = service?.hospital?._id;
-  const addressID = service?.hospital?.address;
+  const addressID = service?.hospital?.address?._id;
 
   console.log(service);
 
   // remove the experience from the array of doctor document
-  await Doctor.findByIdAndUpdate(docId, {
-    $pull: { services: service._id },
-  });
+  const doctor = await Doctor.findByIdAndUpdate(
+    docId,
+    {
+      $pull: { services: service._id },
+    },
+    {
+      new: true,
+    }
+  );
 
   // fetch hospital
   if (hospitalID) {
@@ -191,6 +205,8 @@ exports.deleteService = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    data: null,
+    data: {
+      user: doctor,
+    },
   });
 });

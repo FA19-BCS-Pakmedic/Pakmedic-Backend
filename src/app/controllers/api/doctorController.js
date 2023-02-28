@@ -411,18 +411,12 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
 /***************************DOCTOR UPDATION AND DELETION OPERATIONS**********************************/
 // method to update doctor details
 exports.updateDoctor = catchAsync(async (req, res, next) => {
-  const id = req.decoded.id;
+  const id = req.user._id;
 
   const data = req.body;
 
-  // checking if the doctor exists
-  const doctor = await Doctor.findById(id);
-  if (!doctor) {
-    return next(new AppError(`Doctor ${userNotFound}`, 404));
-  }
-
   // updating the doctor details
-  const updatedDoctor = await Doctor.findByIdAndUpdate(
+  const doctor = await Doctor.findByIdAndUpdate(
     id,
     { $set: data },
     {
@@ -431,11 +425,15 @@ exports.updateDoctor = catchAsync(async (req, res, next) => {
     }
   );
 
+  if (!doctor) {
+    return next(new AppError(`Doctor ${userNotFound}`, 404));
+  }
+
   res.status(200).json({
     success: true,
     message: `Docter ${successfullyUpdated}`,
     data: {
-      updatedDoctor,
+      user: doctor,
     },
   });
 });
@@ -642,8 +640,10 @@ exports.findDoctorsByHospital = catchAsync(async (req, res, next) => {
 
 //add a treatment
 exports.addTreatment = catchAsync(async (req, res, next) => {
-  const id = req.decoded.id;
+  const id = req.user._id;
   const { treatment } = req.body;
+
+  console.log("TREATMENT", treatment);
 
   const doctor = await Doctor.findById(id);
 
@@ -661,7 +661,7 @@ exports.addTreatment = catchAsync(async (req, res, next) => {
     success: true,
     message: `Treatment ${successfullyAdded}`,
     data: {
-      doctor,
+      user: doctor,
     },
   });
 });

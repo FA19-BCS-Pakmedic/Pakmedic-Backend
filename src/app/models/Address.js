@@ -14,7 +14,6 @@ const addressSchema = mongoose.Schema({
   },
   state: {
     type: String,
-    required: [true, `${requiredError} state`],
   },
   country: {
     type: String,
