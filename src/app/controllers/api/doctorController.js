@@ -15,6 +15,7 @@ const {
   getConfCodeEmailTemplate,
   deleteFile,
   getGridFsFileStream,
+  getGridFsStream,
 } = require("../../utils/helpers");
 const { pmcConf } = require("../../utils/configs");
 const {
@@ -45,6 +46,7 @@ const {
 
 //importing models
 const db = require("../../models");
+const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
@@ -864,11 +866,60 @@ exports.removeAbout = catchAsync(async (req, res, next) => {
 exports.addAvatar = catchAsync(async (req, res, next) => {
   console.log(req.file);
 
+  const id = req.user._id;
+
+  const doctor = await Doctor.findById(id);
+
+  if (!doctor) {
+    return next(new AppError(`Doctor ${userNotFound}`, 404));
+  }
+
+  doctor.avatar = req.file.filename;
+
+  await doctor.save();
+
+  
+
   res.status(200).json({
     success: true,
     message: `Avatar ${successfullyAdded}`,
-    // data: {
-    //   doctor,
-    // },
+    data: {
+     user: doctor,
+    },
   });
+});
+
+const mongodb = require("mongodb");
+const { connectionString } = require("../../utils/configs/dbConfig");
+
+exports.getAvatar = catchAsync(async (req, res, next) => {
+  const { filename } = req.params;
+
+  try {
+    const client = await mongodb.MongoClient.connect(connectionString, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    const db = client.db();
+    const bucket = new mongodb.GridFSBucket(db, {
+      bucketName: "uploads",
+    });
+
+    const downloadStream = bucket.openDownloadStreamByName(filename);
+
+    downloadStream.on("data", (chunk) => {
+      console.log(chunk);
+      res.write(chunk);
+    });
+
+    downloadStream.on("error", () => {
+      res.sendStatus(404);
+    });
+
+    downloadStream.on("end", () => {
+      res.end();
+    });
+  } catch (err) {
+    throw err;
+  }
 });

@@ -33,6 +33,7 @@ const {
   verifyOTP,
   getDoctor,
   addAvatar,
+  getAvatar,
   // getAvatar,
 } = require("../../controllers/api/doctorController");
 
@@ -126,9 +127,12 @@ router
 
 router
   .route("/avatar")
+
   .post([uploadSingle()], addAvatar)
   .patch([singleFileUpload("avatar", "images", "avatar")], updateProfileImage)
   .delete(removeProfileImage);
+
+router.get("/avatar/:filename", getAvatar);
 
 /*******************************DOCTOR's TREATEMENT****************/
 router

@@ -1,5 +1,7 @@
 const { GridFsStorage } = require("multer-gridfs-storage");
 
+const uuid = require("uuidv4")
+
 const { connectionString } = require("../configs/dbConfig");
 
 module.exports = () => {
@@ -8,7 +10,7 @@ module.exports = () => {
     file: (req, file) => {
       return new Promise((resolve, reject) => {
         const fileInfo = {
-          filename: file.originalname,
+          filename: uuid.uuid().split('-')[0] + '-' + file.originalname,
           bucketName: "uploads",
         };
         resolve(fileInfo);
