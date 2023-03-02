@@ -32,6 +32,8 @@ const {
   verifyDoctorPMC,
   verifyOTP,
   getDoctor,
+  addAvatar,
+  // getAvatar,
 } = require("../../controllers/api/doctorController");
 
 // middleware imports
@@ -43,6 +45,8 @@ const {
   checkDuplicatePmc,
   singleFileUpload,
   deleteDoctorEmbeddedDocs,
+  upload,
+  uploadSingle,
 } = require("../../middlewares");
 
 // import utils
@@ -122,6 +126,7 @@ router
 
 router
   .route("/avatar")
+  .post([uploadSingle()], addAvatar)
   .patch([singleFileUpload("avatar", "images", "avatar")], updateProfileImage)
   .delete(removeProfileImage);
 

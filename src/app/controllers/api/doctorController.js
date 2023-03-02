@@ -14,6 +14,7 @@ const {
   sendMail,
   getConfCodeEmailTemplate,
   deleteFile,
+  getGridFsFileStream,
 } = require("../../utils/helpers");
 const { pmcConf } = require("../../utils/configs");
 const {
@@ -854,5 +855,20 @@ exports.removeAbout = catchAsync(async (req, res, next) => {
     data: {
       doctor,
     },
+  });
+});
+
+/***********************AVATAR OPERATION********************/
+
+//add avatar
+exports.addAvatar = catchAsync(async (req, res, next) => {
+  console.log(req.file);
+
+  res.status(200).json({
+    success: true,
+    message: `Avatar ${successfullyAdded}`,
+    // data: {
+    //   doctor,
+    // },
   });
 });
