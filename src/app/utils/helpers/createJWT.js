@@ -7,20 +7,6 @@ module.exports = (user, statusCode, req, res) => {
   // create token
   const token = signToken(user);
 
-  // const data = {
-  //   id: user._id,
-  //   name: user.name,
-  //   email: user.email,
-  //   role: user.role,
-  //   avatar: user.avatar,
-  //   gender: user.gender,
-  //   phone: user.phone,
-  //   dob: user.dob,
-  //   cnic: user.cnic,
-  //   address: user.address,
-  //   bio: user.bio,
-  // };
-
   // creating a cookie to send back to the user
   res.cookie("jwt", token, {
     // maxAge: new Date(Date.now() + jwtConf.expiresIn * 24 * 60 * 60 * 1000),
@@ -35,7 +21,7 @@ module.exports = (user, statusCode, req, res) => {
   res.status(statusCode).json({
     status: "success",
     token,
-    // data,
+    user
   });
 };
 

@@ -7,22 +7,27 @@ const Hospital = require("../models").hospital;
 // create hospital
 module.exports = catchAsync(async (req, res, next) => {
   const hospitalId = req.body?.hospitalId;
-  req.body.image = req.file.filename;
-  const { name, address, image } = req.body;
+  req.body.image = req?.file?.filename;
+  const { name, address } = req.body;
+  const image = req?.body?.image || "";
   let isUpdated = false;
 
   if (hospitalId)
     isUpdated = await updateHospital(hospitalId, name, address, image, req);
 
-    
   if (!isUpdated) {
     console.log("creating new address");
-    const hospital = new Hospital({ name, address, image });
+    try {
+      const hospital = new Hospital({ name, address, image });
 
-    const data = await hospital.save();
+      const data = await hospital.save();
 
-    //   saving the returned object from mongodb in body
-    req.body.hospital = data._id;
+      console.log(data);
+      //   saving the returned object from mongodb in body
+      req.body.hospital = data._id;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   next();

@@ -17,7 +17,7 @@ const doctorSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, `${requiredError} password`],
+    // required: [!this.isThirdParty, `${requiredError} password`],
     select: false,
   },
   role: {
@@ -35,10 +35,10 @@ const doctorSchema = mongoose.Schema({
     type: String,
     required: [true, `${requiredError} phone number`],
   },
-  dob: {
-    type: Date,
-    required: [true, `${requiredError} date of birth`],
-  },
+  // dob: {
+  //   type: Date,
+  //   // required: [true, `${requiredError} date of birth`],
+  // },
   gender: {
     type: String,
     required: [true, `${requiredError} gender`],
@@ -51,7 +51,7 @@ const doctorSchema = mongoose.Schema({
   },
   avatar: {
     type: String,
-    required: [true, `${requiredError} avatar`],
+    // required: [true, `${requiredError} avatar`],
   },
 
   //pmc data
@@ -89,6 +89,12 @@ const doctorSchema = mongoose.Schema({
     default: false,
   },
 
+  //third party authentication
+  isThirdParty: {
+    type: Boolean,
+    default: false,
+  },
+
   //password reset related fields
   resetPasswordToken: {
     type: String,
@@ -102,6 +108,18 @@ const doctorSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+});
+
+// pre function to prepopulate before find query
+doctorSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "experiences",
+    select: "-__v",
+  }).populate({
+    path: "services",
+    select: "-__v",
+  });
+  next();
 });
 
 module.exports = mongoose.model(`Doctor`, doctorSchema);

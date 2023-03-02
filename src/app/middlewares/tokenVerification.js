@@ -20,12 +20,14 @@ const models = require("../models");
 module.exports = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
 
+  console.log(req.headers);
   let token;
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+    console.log(token, "as bearer token");
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
@@ -37,7 +39,7 @@ module.exports = catchAsync(async (req, res, next) => {
   const decoded = await promisify(jwt.verify)(token, jwtConf.accessSecret);
 
   console.log("decoded", decoded);
-  req.decoded = decoded;
+  // req.decoded = decoded;
 
   // getting the correct model based on the current user role
   let Model =
@@ -46,24 +48,19 @@ module.exports = catchAsync(async (req, res, next) => {
       : decoded.role === ROLES[1]
       ? models.doctor
       : models.admin;
-      
 
   // 3) Check if user still exists
-  const currentUser = await Model.findById(decoded.id);
+  const currentUser = await Model.findById(decoded?.id);
+  console.log("Current user", currentUser);
+  // const currentUser = await models.doctor.findById(decoded?.id);
 
-  console.log(currentUser);
   if (!currentUser) {
     return next(new AppError(userDoesNotExist, 401));
   }
-  // // 4) Check if user changed password after the token was issued
-  // if (currentUser.changedPasswordAfter(decoded.iat)) {
-  //   return next(
-  //     new AppError("User recently changed password! Please log in again.", 401)
-  //   );
-  // }
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
-  res.locals.user = currentUser;
+  // console.log("Request user", req.user);
+  // res.locals.user = currentUser;
   next();
 });

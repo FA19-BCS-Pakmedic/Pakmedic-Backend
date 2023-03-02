@@ -19,5 +19,5 @@ module.exports = {
   // Regex for city validation
   zipCodeRegex: /^[0-9]{5}$/,
   // Regex for date of birth validation
-  dateOfBirthRegex: /^[0-9]{2}-[0-9]{2}-[0-9]{4}$/,
+  dateOfBirthRegex: /^[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{4}$/,
 };

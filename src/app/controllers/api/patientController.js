@@ -21,7 +21,6 @@ const {
   incorrectEmailPassword,
   userNotFoundID,
   userNotFoundEmail,
-  tokenExpiry,
   invalidToken,
   tokenExpired,
   passwordUpdateSuccess,
@@ -33,6 +32,9 @@ const {
   userNotFound,
   profileImageRemoved,
   profileImageUpdated,
+  OTPExpiry,
+  optSent,
+  unverified,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
@@ -41,49 +43,22 @@ const Patient = db.patient;
 
 // method to sign up patient
 exports.register = catchAsync(async (req, res, next) => {
-  req.body.avatar = req.file.filename;
+  // req.body.avatar = req.file.filename;
 
   const isThirdParty = req.body?.isThirdParty;
 
-  const {
-    email,
-    password,
-    role,
-    name,
-    phone,
-    dob,
-    gender,
-    cnic,
-    height,
-    weight,
-    bloodType,
-    avatar,
-    resetPasswordToken,
-    resetPasswordExpiry,
-    address,
-  } = req?.body;
-
-  // console.log(coordinates);
-
-  const patient = new Patient({
-    email,
-    password: bcrypt.hashSync(password, 10),
-    role,
-    name,
-    phone,
-    dob: new Date(dob),
-    gender,
-    cnic,
-    avatar,
-    bio: {
-      height,
-      weight,
-      bloodType,
-    },
-    resetPasswordToken,
-    resetPasswordExpiry,
-    address,
-  });
+  let patient;
+  if (isThirdParty) {
+    patient = new Patient({
+      ...req.body,
+    });
+  } else {
+    patient = new Patient({
+      ...req.body,
+      password: bcrypt.hashSync(req.body.password, 10),
+    });
+  }
+  console.log(req.body);
 
   // if it is a thirdparty login such as google and facebook
   if (isThirdParty) {
@@ -92,8 +67,8 @@ exports.register = catchAsync(async (req, res, next) => {
   } else {
     // send a verification mail to user's email
     sendMail(
-      email,
-      name,
+      patient?.email,
+      patient?.name,
       getConfCodeEmailTemplate.getVerificationEmailTemplate(
         patient._id,
         "patients"
@@ -102,31 +77,27 @@ exports.register = catchAsync(async (req, res, next) => {
     );
   }
 
-  const data = await patient.save();
+  const user = await patient.save();
 
-  // console.log(req.body);
-
-  res
-    .status(201)
-    .json({ success: true, message: `Patient ${userRegistered}`, data });
+  //  3) If everything ok, send token to client
+  createSendToken(user, 200, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, isThirdParty } = req.body;
 
-  // Check if email and password exist
-  if (!email || !password) {
-    return next(new AppError(provideEmailPassword, 400));
-  }
   const user = await Patient.findOne({ email }).select("+password");
 
-  console.log(user);
-
-  // Check if user exists && password is correct
-  if (!user || !(await matchEncryptions(password, user.password))) {
+  if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
+  } else if (!user?.isThirdParty) {
+    // Check if user exists && password is correct
+    if (!(await matchEncryptions(password, user.password))) {
+      return next(new AppError(incorrectEmailPassword, 401));
+    }
+  } else if (user.isThirdParty && !user.isVerified) {
+    return next(new AppError(unverified, 401));
   }
-
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
@@ -168,7 +139,37 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     resetToken: resetPasswordToken,
-    message: `${tokenExpiry} 10mins`,
+    message: `${optSent}. ${OTPExpiry} 10mins`,
+  });
+});
+
+//method to verify the otp code sent to the email
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  //get email and otp from req query param
+  const { email, otp } = req.query;
+
+  const patient = await Patient.findOne({ email });
+  //if patient with email does not exist
+
+  console.log(patient);
+
+  if (!patient) {
+    return next(new AppError(`patient ${userNotFoundEmail}`, 404));
+  }
+
+  //if the otp code is incorrect
+  if (patient.resetPasswordToken !== otp) {
+    return next(new AppError(invalidToken, 400));
+  }
+
+  //if the otp code has been expired
+  if (patient.resetPasswordExpiry < Date.now()) {
+    return next(new AppError(tokenExpired, 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "OTP verified",
   });
 });
 
@@ -181,12 +182,19 @@ exports.resetForgottenPassword = catchAsync(async (req, res, next) => {
   }
 
   const { email, resetPasswordToken, password } = req.body;
+
+  console.log(req.body);
   const patient = await Patient.findOne({
-    $$or: [{ email }, { resetPasswordToken }],
+    email: email,
   });
+
+  console.log(patient);
 
   // checking token validity
   if (!patient) {
+    return next(new AppError(`Patient ${userNotFoundEmail}`, 400));
+  }
+  if (patient.resetPasswordToken !== resetPasswordToken) {
     return next(new AppError(invalidToken, 400));
   }
   if (patient.resetPasswordExpiry < Date.now()) {
@@ -225,6 +233,22 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: passwordUpdateSuccess,
+  });
+});
+
+//get patient object if he is logged in
+exports.getPatient = catchAsync(async (req, res, next) => {
+  const user = req.user;
+
+  if (!user) {
+    return next(new AppError(`Patient ${userNotFoundEmail}`, 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "Patient found",
+    data: {
+      user,
+    },
   });
 });
 
@@ -345,7 +369,7 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 });
 
 // get the specific patient data
-exports.getPatient = catchAsync(async (req, res, next) => {
+exports.getPatientById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const patient = await Patient.findById(id).select("+password");
   if (!patient) {

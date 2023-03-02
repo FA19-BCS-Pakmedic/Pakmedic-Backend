@@ -11,4 +11,6 @@ helpers.sendVerificationToken = require("./sendVerificationToken");
 helpers.fetchGeocode = require("./fetchGeocode");
 helpers.sendMail = require("./sendMail");
 helpers.getConfCodeEmailTemplate = require("./getConfCodeEmailTemp");
+helpers.getGridFsStorage = require("./gridfsFileUpload");
+helpers.getGridFsStream = require("./gridfsFileStream");
 module.exports = helpers;

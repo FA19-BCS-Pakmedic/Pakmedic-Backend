@@ -12,7 +12,7 @@ const {
 const {
   invalidEmail,
   invalidPassword,
-  invalidCnic,
+  // invalidCnic,
   invalidStringRegex,
   invalidPhoneNo,
   invalidDOB,
@@ -22,13 +22,17 @@ const {
 module.exports = catchAsync(async (req, res, next) => {
   // console.log("This middle ware is running");
   //   console.log(body("email").isEmail());
+  console.log(req.body);
+
   await body("email").isEmail().withMessage(invalidEmail).run(req);
   console.log(validationResult(req));
-  await body("password")
-    .matches(passwordRegex)
-    .withMessage(invalidPassword)
-    .run(req);
-  await body("cnic").matches(cnicRegex).withMessage(invalidCnic).run(req);
+  if (!req.body.isThirdParty) {
+    await body("password")
+      .matches(passwordRegex)
+      .withMessage(invalidPassword)
+      .run(req);
+  }
+  // await body("cnic").matches(cnicRegex).withMessage(invalidCnic).run(req);
   await body("name")
     .matches(stringRegex)
     .withMessage(invalidStringRegex)
@@ -40,7 +44,7 @@ module.exports = catchAsync(async (req, res, next) => {
   const errors = validationResult(req);
   console.log(errors);
   if (errors.errors.length > 0) {
-    deleteFile(req.file.filename, "images");
+    // deleteFile(req.file.filename, "images");
     return next(new AppError(errors.array()[0].msg, 400));
   }
 

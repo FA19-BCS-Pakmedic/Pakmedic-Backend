@@ -8,31 +8,6 @@ const { requiredError } = require("../utils/constants/RESPONSEMESSAGES");
 const biologicalSchema = require("./NestedSchemas/BiologicalData")(mongoose);
 const medicalSchema = require("./NestedSchemas/MedicalData")(mongoose);
 
-// const biologicalSchema = mongoose.Schema({
-//   height: {
-//     type: Number,
-//   },
-//   weight: {
-//     type: Number,
-//   },
-//   bloodType: {
-//     type: String,
-//     enum: Object.values(BLOODTYPES),
-//   },
-// });
-
-// const medicalSchema = mongoose.Schema({
-//   allergies: {
-//     type: [String],
-//   },
-//   surgeries: {
-//     type: [String],
-//   },
-//   geneticDiseases: {
-//     type: [String],
-//   },
-// });
-
 const patientSchema = mongoose.Schema({
   //authentication data
   email: {
@@ -41,12 +16,12 @@ const patientSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, `${requiredError} password`],
+    // required: [true, `${requiredError} password`],
     select: false,
   },
   role: {
     type: String,
-    required: [true, `${requiredError} role`],
+    required: [!this.isThirdParty, `${requiredError} role`],
     enum: Object.values(ROLES),
   },
 
@@ -70,14 +45,14 @@ const patientSchema = mongoose.Schema({
   },
   cnic: {
     type: String,
-    required: [true, `${requiredError} cnic`],
+    // required: [true, `${requiredError} cnic`],
   },
   address: {
     // replace with address reference
     // type: String,
     type: mongoose.Schema.Types.ObjectId,
     ref: "Address",
-    required: [true, `${requiredError} address`],
+    // required: [true, `${requiredError} address`],
     // required: [true, `${requiredError} address`],
   },
   avatar: {
@@ -122,7 +97,6 @@ const patientSchema = mongoose.Schema({
     type: [String],
   },
   reports: [
-    //replace with reports refernce
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Report",
@@ -131,6 +105,12 @@ const patientSchema = mongoose.Schema({
 
   //account verification
   isVerified: {
+    type: Boolean,
+    default: false,
+  },
+
+  //third party authentication
+  isThirdParty: {
     type: Boolean,
     default: false,
   },

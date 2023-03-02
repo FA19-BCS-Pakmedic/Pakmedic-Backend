@@ -1,7 +1,6 @@
 // npm packages import
 const express = require("express");
-// const multer = require("multer");
-// const path = require("path");
+
 const { check } = require("express-validator");
 
 // controller functions import
@@ -30,8 +29,13 @@ const {
   findDoctors,
   addUpdateAbout,
   removeAbout,
+  verifyDoctorPMC,
+  verifyOTP,
+  getDoctor,
+  addAvatar,
+  getAvatar,
+  // getAvatar,
 } = require("../../controllers/api/doctorController");
-const { verifyPatient } = require("../../controllers/api/patientController");
 
 // middleware imports
 const {
@@ -42,6 +46,8 @@ const {
   checkDuplicatePmc,
   singleFileUpload,
   deleteDoctorEmbeddedDocs,
+  upload,
+  uploadSingle,
 } = require("../../middlewares");
 
 // import utils
@@ -51,7 +57,7 @@ const {
   invalidPassword,
   containOnlyAlphabets,
 } = require("../../utils/constants/RESPONSEMESSAGES");
-const roles = require("../../utils/constants/ROLES");
+const ROLES = require("../../utils/constants/ROLES");
 
 // initializing router
 const router = express.Router();
@@ -59,18 +65,10 @@ const router = express.Router();
 /*****************************ROUTES********************************/
 
 // verify doctor pmc id
-router.post("/pmc/verify", [checkDuplicatePmc], verifyDoctor);
+router.post("/pmc/verify", [checkDuplicatePmc], verifyDoctorPMC);
 
 // register a doctor
-router.post(
-  "/register",
-  [
-    singleFileUpload("avatar", "images", "avatar"),
-    doctorDataValidator,
-    checkDuplicateDoctor,
-  ],
-  register
-);
+router.post("/register", [doctorDataValidator, checkDuplicateDoctor], register);
 
 // verify user account
 router.get("/verify/:id", verifyDoctor);
@@ -79,8 +77,8 @@ router.get("/verify/:id", verifyDoctor);
 router.post("/login", login);
 
 // third party login routes
-router.post("/login/facebook", facebookLogin);
-router.post("/login/google", googleLogin);
+// router.post("/login/facebook", facebookLogin);
+// router.post("/login/google", googleLogin);
 
 // get a validation token to reset a forgotten password
 router.patch(
@@ -88,6 +86,10 @@ router.patch(
   [check("email", invalidEmail).isEmail()],
   forgotPassword
 );
+
+// verify otp
+router.get("/verify-otp", verifyOTP);
+
 // reset a forgotten password
 router.patch(
   "/reset-forgotten-password",
@@ -102,10 +104,10 @@ router.get("/hospitals", findDoctorsByHospital);
 router.use(verifyToken);
 
 // find doctors
-router.get("/:id", verifyToken, findDoctorById);
-router.get("/", findDoctors);
+router.get("/find", findDoctors);
+router.get("/:id", findDoctorById);
 
-router.use(authorizeRole(roles[1]));
+router.use(authorizeRole(ROLES[1]));
 
 //reset Password
 router.patch("/reset-password", [
@@ -118,20 +120,19 @@ router.patch("/reset-password", [
 // update and delete profile routes
 router
   .route("/")
-  .patch([doctorDataValidator], updateDoctor)
+  .get(getDoctor)
+  // .patch([doctorDataValidator], updateDoctor)
+  .patch(updateDoctor)
   .delete([deleteDoctorEmbeddedDocs], deleteDoctor);
-
-// update profile image route
-// router.patch(
-//   "/avatar",
-//   [singleFileUpload("avatar", "images", "avatar")],
-//   updateProfileImage
-// );
 
 router
   .route("/avatar")
+
+  .post([uploadSingle()], addAvatar)
   .patch([singleFileUpload("avatar", "images", "avatar")], updateProfileImage)
   .delete(removeProfileImage);
+
+router.get("/avatar/:filename", getAvatar);
 
 /*******************************DOCTOR's TREATEMENT****************/
 router

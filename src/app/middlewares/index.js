@@ -13,4 +13,5 @@ middlewares.fetchAddress = require("./fetchAddress");
 middlewares.fetchHospital = require("./fetchHospital");
 middlewares.singleFileUpload = require("./singleFileUpload");
 middlewares.deleteDoctorEmbeddedDocs = require("./deleteDoctorEmbeddedDocs");
+middlewares.uploadSingle = require('./uploadSingle');
 module.exports = middlewares;

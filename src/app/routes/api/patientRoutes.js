@@ -19,6 +19,8 @@ const {
   deletePatient,
   removeProfileImage,
   updateProfileImage,
+  verifyOTP,
+  getPatientById,
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -49,7 +51,7 @@ const router = express.Router();
 router.post(
   "/register",
   [
-    singleFileUpload("avatar", "images", "avatar"),
+    // singleFileUpload("avatar", "images", "avatar"),
     patientRegistrationValidator,
     checkDuplicatePatient,
     fetchAddress,
@@ -73,6 +75,10 @@ router.patch(
   [check("email", invalidEmail).isEmail()],
   forgotPassword
 );
+
+// verify otp
+router.get("/verify-otp", verifyOTP);
+
 // reset a forgotten password
 router.patch(
   "/reset-forgotten-password",
@@ -93,7 +99,7 @@ router.patch("/reset-password", [
 router.use(authorizeRole(ROLES[0]));
 
 // patient routes to get, update users
-router.route("/:id").get(getPatient);
+router.route("/:id").get(getPatientById);
 
 router
   .route("/avatar")
@@ -102,6 +108,7 @@ router
 
 router
   .route("/")
+  .get(getPatient)
   .patch([patientRegistrationValidator, fetchAddress], updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
 module.exports = router;

@@ -1,10 +1,7 @@
 //npm packages import
 const crypto = require("crypto");
-// const jwt = require("jsonwebtoken");
 const jwt_decode = require("jwt-decode");
-// const { promisify } = require("util");
 const bcrypt = require("bcrypt");
-// const formidable = require("formidable");
 const { validationResult } = require("express-validator");
 const fetch = require("node-fetch");
 
@@ -17,6 +14,8 @@ const {
   sendMail,
   getConfCodeEmailTemplate,
   deleteFile,
+  getGridFsFileStream,
+  getGridFsStream,
 } = require("../../utils/helpers");
 const { pmcConf } = require("../../utils/configs");
 const {
@@ -24,7 +23,6 @@ const {
   userRegistered,
   provideEmailPassword,
   incorrectEmailPassword,
-  tokenExpiry,
   passwordUpdateSuccess,
   tokenExpired,
   invalidToken,
@@ -41,21 +39,29 @@ const {
   profileImageUpdated,
   noDoctorsInHospital,
   profileImageRemoved,
+  optSent,
+  OTPExpiry,
+  unverified,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
 const db = require("../../models");
+const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
-exports.verifyDoctor = catchAsync(async (req, res, next) => {
-  const { pmcID } = req.body;
-  if (!pmcID) {
+exports.verifyDoctorPMC = catchAsync(async (req, res, next) => {
+  const { pmcId } = req.body;
+
+  console.log(req.body);
+
+  if (!pmcId) {
     return next(new AppError(invalidPmcID, 400));
   }
   const sendData = {
-    RegistrationNo: pmcID,
+    RegistrationNo: pmcId,
   };
+
   //   making a post request to the pmc backend to fetch the doctor data
   const response = await fetch(pmcConf.pmcEndPoint, {
     method: "POST",
@@ -63,6 +69,7 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
     headers: { "Content-Type": "application/json" },
   });
   const data = await response.json();
+
   if (data.status == true) {
     return res.status(200).json({
       status: "success",
@@ -70,16 +77,12 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
       message: data.message,
     });
   } else {
-    console.log(data);
-
     return next(new AppError(data.message, 400));
   }
 });
 
 // method to register the doctor
 exports.register = catchAsync(async (req, res, next) => {
-  req.body.avatar = req.file.filename;
-  const isThirdParty = req.body?.isThirdParty;
   ({
     email,
     password,
@@ -90,32 +93,34 @@ exports.register = catchAsync(async (req, res, next) => {
     gender,
     location,
     avatar,
-    pmcID,
+    pmcId,
     qualifications,
     issueDate,
     expiryDate,
     status,
     speciality,
+    isThirdParty,
   } = req.body);
 
-  const doctor = new Doctor({
+  let doctor;
+
+  doctor = new Doctor({
     email,
-    password: bcrypt.hashSync(password, 10),
+    password: isThirdParty ? "" : bcrypt.hashSync(password, 10),
     role,
     name,
     phone,
-    dob: new Date(dob),
     gender,
     location,
-    avatar,
     pmc: {
-      id: pmcID,
+      id: pmcId,
       qualifications,
       issueDate: new Date(issueDate),
       expiryDate: new Date(expiryDate),
       status,
     },
     speciality,
+    isThirdParty: isThirdParty ? isThirdParty : false,
   });
 
   // if it is a thirdparty login such as google and facebook
@@ -135,34 +140,55 @@ exports.register = catchAsync(async (req, res, next) => {
     );
   }
 
-  const data = await doctor.save();
-
-  return res.status(201).json({
-    status: "success",
-    data: data,
-    message: `Doctor ${userRegistered}`,
-  });
-});
-
-// method to login the doctor
-exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return next(new AppError(provideEmailPassword, 400));
-  }
-  const user = await Doctor.findOne({ email }).select("+password");
-
-  console.log(user);
-
-  // Check if user exists && password is correct
-  if (!user || !(await matchEncryptions(password, user.password))) {
-    return next(new AppError(incorrectEmailPassword, 401));
-  }
+  const user = await doctor.save();
 
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
+
+// method to login the doctor
+exports.login = catchAsync(async (req, res, next) => {
+  const { email, password, isThirdParty } = req.body;
+
+  // if (!email || !password) {
+  //   return next(new AppError(provideEmailPassword, 400));
+  // }
+
+  const user = await Doctor.findOne({ email }).select("+password");
+
+  if (!user || (!isThirdParty && !password)) {
+    return next(new AppError(incorrectEmailPassword, 401));
+  } else if (!user?.isThirdParty) {
+    // Check if user exists && password is correct
+    if (!(await matchEncryptions(password, user.password))) {
+      return next(new AppError(incorrectEmailPassword, 401));
+    }
+  } else if (isThirdParty && !user.isVerified) {
+    return next(new AppError(unverified, 401));
+  }
+  // 3) If everything ok, send token to client
+  createSendToken(user, 200, req, res);
+});
+
+// get doctor if he is logged in
+exports.getDoctor = catchAsync(async (req, res, next) => {
+  const user = req.user;
+
+  console.log("GET DOCTOR METHOD: ", user);
+
+  if (!user) {
+    return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "Doctor found",
+    data: {
+      user,
+    },
+  });
+});
+
+//method to check whether is already registered and return the
 
 /***********************************PASSWORD RESET FUNCITONALITY ********************************************/
 
@@ -196,13 +222,40 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   doctor.resetPasswordToken = resetPasswordToken;
   doctor.resetPasswordExpiry = resetPasswordExpiry;
 
-  const updatedDoctor = await doctor.save();
+  await doctor.save();
 
-  // console.log(updatedPatient);
   res.status(200).json({
     success: true,
     resetToken: resetPasswordToken,
-    message: `${tokenExpiry} 10mins`,
+    message: `${optSent}. ${OTPExpiry} 10mins`,
+  });
+});
+
+//method to verify the otp code sent to the email
+exports.verifyOTP = catchAsync(async (req, res, next) => {
+  //get email and otp from req query param
+  const { email, otp } = req.query;
+
+  console.log(email, otp);
+  const doctor = await Doctor.findOne({ email });
+  //if doctor with email does not exist
+  if (!doctor) {
+    return next(new AppError(`doctor ${userNotFoundEmail}`, 404));
+  }
+
+  //if the otp code is incorrect
+  if (doctor.resetPasswordToken !== otp) {
+    return next(new AppError(invalidToken, 400));
+  }
+
+  //if the otp code has been expired
+  if (doctor.resetPasswordExpiry < Date.now()) {
+    return next(new AppError(tokenExpired, 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "OTP verified",
   });
 });
 
@@ -214,29 +267,31 @@ exports.resetForgottenPassword = catchAsync(async (req, res, next) => {
     return next(new AppError(errors.array()[0].msg, 400));
   }
 
-  const { resetPasswordToken, password } = req.body;
-  const patient = await Doctor.findOne({ resetPasswordToken });
+  const { email, resetPasswordToken, password } = req.body;
+  const doctor = await Doctor.findOne({
+    $and: [{ email }, { resetPasswordToken }],
+  });
 
   // checking token validity
-  if (!patient) {
+  if (!doctor) {
     return next(new AppError(invalidToken, 400));
   }
-  if (patient.resetPasswordExpiry < Date.now()) {
+  if (doctor.resetPasswordExpiry < Date.now()) {
     return next(new AppError(tokenExpired, 400));
   }
 
   // updating password and token fields if the token is valid
-  patient.password = bcrypt.hashSync(password, 10);
-  patient.resetPasswordToken = undefined;
-  patient.resetPasswordExpiry = undefined;
-  await patient.save();
+  doctor.password = bcrypt.hashSync(password, 10);
+  doctor.resetPasswordToken = undefined;
+  doctor.resetPasswordExpiry = undefined;
+  await doctor.save();
   res.status(200).json({
     success: true,
     message: passwordUpdateSuccess,
   });
 });
 
-//reset password if the patient is logged in
+//reset password if the doctor is logged in
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // checking if there are any errors
   const errors = validationResult(req);
@@ -245,15 +300,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   }
   const { email, password, newPassword } = req.body;
 
-  const patient = await Doctor.findOne({ email }).select("+password");
-  if (!patient) {
+  const doctor = await Doctor.findOne({ email }).select("+password");
+  if (!doctor) {
     return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
   }
-  if (!(await matchEncryptions(password, patient.password))) {
+  if (!(await matchEncryptions(password, doctor.password))) {
     return next(new AppError(incorrectPassword, 400));
   }
-  patient.password = bcrypt.hashSync(newPassword, 10);
-  await patient.save();
+  doctor.password = bcrypt.hashSync(newPassword, 10);
+  await doctor.save();
   res.status(200).json({
     success: true,
     message: passwordUpdateSuccess,
@@ -280,92 +335,91 @@ exports.verifyDoctor = catchAsync(async (req, res, next) => {
 });
 
 /********************************************THIRD PARTY AUTHENTICATION FUNCTIONALITY  ******************************************/
-//method to login/singup user using google their google account
-exports.googleLogin = catchAsync(async (req, res, next) => {
-  // const { credentials, role, password } = req.body;
+// //method to login/singup user using google their google account
+// exports.googleLogin = catchAsync(async (req, res, next) => {
+//   // const { credentials, role, password } = req.body;
 
-  const { credentials } = req.body;
+//   const { credentials } = req.body;
 
-  // console.log(jwt_decode(credentials));
+//   // console.log(jwt_decode(credentials));
 
-  const email = jwt_decode(credentials).email;
+//   const email = jwt_decode(credentials).email;
 
-  console.log(email);
+//   console.log(email);
 
-  // socialAuth(req, res, email, role, password);
-  socialAuth(req, res, next, email);
-});
+//   // socialAuth(req, res, email, role, password);
+//   socialAuth(req, res, next, email);
+// });
 
-//method to login/singup user using google auth
-exports.facebookLogin = catchAsync(async (req, res, next) => {
-  // const { accessToken, userID, role, password } = req.body;
-  const { accessToken, userID } = req.body;
-  console.log(accessToken, userID);
+// //method to login/singup user using google auth
+// exports.facebookLogin = catchAsync(async (req, res, next) => {
+//   // const { accessToken, userID, role, password } = req.body;
+//   const { accessToken, userID } = req.body;
+//   console.log(accessToken, userID);
 
-  // fetching the user data from facebook graph api using the userID and accessToken
-  const facebookURL = `https://graph.facebook.com/v14.0/${userID}?fields=name,email&access_token=${accessToken}`;
+//   // fetching the user data from facebook graph api using the userID and accessToken
+//   const facebookURL = `https://graph.facebook.com/v14.0/${userID}?fields=name,email&access_token=${accessToken}`;
 
-  const response = await fetch(facebookURL);
+//   const response = await fetch(facebookURL);
 
-  const data = await response.json();
+//   const data = await response.json();
 
-  console.log(data);
+//   console.log(data);
 
-  const email = data.email;
+//   const email = data.email;
 
-  // socialAuth(req, res, email, role, password);
-  socialAuth(req, res, next, email);
-});
+//   // socialAuth(req, res, email, role, password);
+//   socialAuth(req, res, next, email);
+// });
 
-// social login/signup method that is common for both google and facebook endpoints
-const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
-  const user = await Doctor.findOne({ email });
+// // social login/signup method that is common for both google and facebook endpoints
+// const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
+//   const user = await Doctor.findOne({ email });
 
-  // if client is already registered with the google account we will directly log them in and send an access token to the client
-  // if (user) {
-  //   return createSendToken(user, 200, req, res);
-  // }
+//   // if client is already registered with the google account we will directly log them in and send an access token to the client
+//   // if (user) {
+//   //   return createSendToken(user, 200, req, res);
+//   // }
 
-  if (!user) {
-    return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
-  }
+//   if (!user) {
+//     return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
+//   }
 
-  createSendToken(user, 200, req, res);
+//   createSendToken(user, 200, req, res);
 
-  // // generating a random password if no password is provided from the client
-  // if (!password) {
-  //   password = crypto.randomBytes(10).toString("hex");
-  // }
+//   // // generating a random password if no password is provided from the client
+//   // if (!password) {
+//   //   password = crypto.randomBytes(10).toString("hex");
+//   // }
 
-  // // if client is not registered with the google account we will register them
-  // const newUser = new User({
-  //   email,
-  //   role,
-  //   password: bcrypt.hashSync(password, 10),
-  // });
+//   // // if client is not registered with the google account we will register them
+//   // const newUser = new User({
+//   //   email,
+//   //   role,
+//   //   password: bcrypt.hashSync(password, 10),
+//   // });
 
-  // await newUser.save();
+//   // await newUser.save();
 
-  // res
-  //   .status(200)
-  //   .json({ status: "success", message: "user registered successfully" });
-});
+//   // res
+//   //   .status(200)
+//   //   .json({ status: "success", message: "user registered successfully" });
+// });
+
+// 3rd party auth method
+// const socialAuth = catchAsync(async (req, res, next) => {
+//   console.log("email", req.email);
+// });
 
 /***************************DOCTOR UPDATION AND DELETION OPERATIONS**********************************/
 // method to update doctor details
 exports.updateDoctor = catchAsync(async (req, res, next) => {
-  const id = req.decoded.id;
+  const id = req.user._id;
 
   const data = req.body;
 
-  // checking if the doctor exists
-  const doctor = await Doctor.findById(id);
-  if (!doctor) {
-    return next(new AppError(`Doctor ${userNotFound}`, 404));
-  }
-
   // updating the doctor details
-  const updatedDoctor = await Doctor.findByIdAndUpdate(
+  const doctor = await Doctor.findByIdAndUpdate(
     id,
     { $set: data },
     {
@@ -374,11 +428,15 @@ exports.updateDoctor = catchAsync(async (req, res, next) => {
     }
   );
 
+  if (!doctor) {
+    return next(new AppError(`Doctor ${userNotFound}`, 404));
+  }
+
   res.status(200).json({
     success: true,
     message: `Docter ${successfullyUpdated}`,
     data: {
-      updatedDoctor,
+      user: doctor,
     },
   });
 });
@@ -406,7 +464,7 @@ exports.deleteDoctor = catchAsync(async (req, res, next) => {
   });
 });
 
-//search doctor by name, location, speciality, and treatments
+//search doctor by name, location, speciality, treatments, email
 exports.findDoctors = catchAsync(async (req, res, next) => {
   const { keyword } = req.body;
   const doctors = await Doctor.find({
@@ -430,6 +488,21 @@ exports.findDoctors = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+//get doctor by email and if the doctor is found then return the doctor data along with the token
+// exports.getDoctorByEmail = catchAsync(async (req, res, next) => {
+//   const { email } = req.body;
+
+//   const doctor = await Doctor.findOne({ email });
+
+//   if (!doctor) {
+//     return next(new AppError(`Doctor ${userNotFound}`, 404));
+//   }
+
+//   createSendToken(doctor, 200, req, res);
+// });
+
+// { email }
 
 // update doctor's profile image by deleting the old and adding the new
 exports.updateProfileImage = catchAsync(async (req, res, next) => {
@@ -570,8 +643,10 @@ exports.findDoctorsByHospital = catchAsync(async (req, res, next) => {
 
 //add a treatment
 exports.addTreatment = catchAsync(async (req, res, next) => {
-  const id = req.decoded.id;
+  const id = req.user._id;
   const { treatment } = req.body;
+
+  console.log("TREATMENT", treatment);
 
   const doctor = await Doctor.findById(id);
 
@@ -589,7 +664,7 @@ exports.addTreatment = catchAsync(async (req, res, next) => {
     success: true,
     message: `Treatment ${successfullyAdded}`,
     data: {
-      doctor,
+      user: doctor,
     },
   });
 });
@@ -783,4 +858,68 @@ exports.removeAbout = catchAsync(async (req, res, next) => {
       doctor,
     },
   });
+});
+
+/***********************AVATAR OPERATION********************/
+
+//add avatar
+exports.addAvatar = catchAsync(async (req, res, next) => {
+  console.log(req.file);
+
+  const id = req.user._id;
+
+  const doctor = await Doctor.findById(id);
+
+  if (!doctor) {
+    return next(new AppError(`Doctor ${userNotFound}`, 404));
+  }
+
+  doctor.avatar = req.file.filename;
+
+  await doctor.save();
+
+  
+
+  res.status(200).json({
+    success: true,
+    message: `Avatar ${successfullyAdded}`,
+    data: {
+     user: doctor,
+    },
+  });
+});
+
+const mongodb = require("mongodb");
+const { connectionString } = require("../../utils/configs/dbConfig");
+
+exports.getAvatar = catchAsync(async (req, res, next) => {
+  const { filename } = req.params;
+
+  try {
+    const client = await mongodb.MongoClient.connect(connectionString, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    const db = client.db();
+    const bucket = new mongodb.GridFSBucket(db, {
+      bucketName: "uploads",
+    });
+
+    const downloadStream = bucket.openDownloadStreamByName(filename);
+
+    downloadStream.on("data", (chunk) => {
+      console.log(chunk);
+      res.write(chunk);
+    });
+
+    downloadStream.on("error", () => {
+      res.sendStatus(404);
+    });
+
+    downloadStream.on("end", () => {
+      res.end();
+    });
+  } catch (err) {
+    throw err;
+  }
 });
