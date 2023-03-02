@@ -24,11 +24,11 @@ dotenv.config({ path: "../env/config.env" });
 const app = require("./app");
 
 // importing utils
-const { dbConf, serverConf } = require("./app/utils/configs");
+const { serverConf } = require("./app/utils/configs");
+const { connectionString } = require("./app/utils/configs/dbConfig");
 
 // setting database and connecting to it
-const connectionString = `mongodb://${dbConf.HOST}:${dbConf.PORT}/${dbConf.DB}`;
-const DB = mongoose.connect(connectionString);
+mongoose.connect(connectionString);
 console.log(databaseConnected);
 
 // setting the server to run on a port
@@ -44,6 +44,8 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
   });
 });
+
+module.exports = { mongoose: mongoose, server };
 
 // process.on("SIGTERM", () => {
 //   console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");

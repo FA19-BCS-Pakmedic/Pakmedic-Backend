@@ -46,7 +46,7 @@ router.post(
   addService
 ); //this route is only accessible to doctors
 
-router.get("/", [authorizeRole(roles[2])], getAllServices); //this route is only accessible to admin
+router.get("/", getAllServices); //this route is only accessible to admin
 
 router
   .route("/:id")

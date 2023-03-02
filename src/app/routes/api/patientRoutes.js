@@ -20,6 +20,7 @@ const {
   removeProfileImage,
   updateProfileImage,
   verifyOTP,
+  getPatientById,
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -98,7 +99,7 @@ router.patch("/reset-password", [
 router.use(authorizeRole(ROLES[0]));
 
 // patient routes to get, update users
-router.route("/:id").get(getPatient);
+router.route("/:id").get(getPatientById);
 
 router
   .route("/avatar")
@@ -107,6 +108,7 @@ router
 
 router
   .route("/")
+  .get(getPatient)
   .patch([patientRegistrationValidator, fetchAddress], updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
 module.exports = router;

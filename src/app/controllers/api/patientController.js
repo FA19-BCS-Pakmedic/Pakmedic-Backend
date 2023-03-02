@@ -34,6 +34,7 @@ const {
   profileImageUpdated,
   OTPExpiry,
   optSent,
+  unverified,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 //importing models
@@ -46,50 +47,17 @@ exports.register = catchAsync(async (req, res, next) => {
 
   const isThirdParty = req.body?.isThirdParty;
 
-  // const {
-  //   email,
-  //   password,
-  //   role,
-  //   name,
-  //   phone,
-  //   dob,
-  //   gender,
-  //   cnic,
-  //   height,
-  //   weight,
-  //   bloodType,
-  //   // avatar,
-  //   resetPasswordToken,
-  //   resetPasswordExpiry,
-  //   address,
-  // } = req?.body;
-
-  // console.log(coordinates);
-
-  // const patient = new Patient({
-  //   email: req.body.email,
-  //   password: bcrypt.hashSync(req.body.password, 10),
-  //   role: req.body.role,
-  //   name: req.body.name,
-  //   phone: req.body.phone,
-  //   dob: new Date(dob),
-  //   gender,
-  //   cnic,
-  //   // avatar,
-  //   bio: {
-  //     height,
-  //     weight,
-  //     bloodType,
-  //   },
-  //   resetPasswordToken,
-  //   resetPasswordExpiry,
-  //   address,
-  // });
-  const patient = new Patient({
-    ...req.body,
-    password: bcrypt.hashSync(req.body.password, 10),
-  });
-
+  let patient;
+  if (isThirdParty) {
+    patient = new Patient({
+      ...req.body,
+    });
+  } else {
+    patient = new Patient({
+      ...req.body,
+      password: bcrypt.hashSync(req.body.password, 10),
+    });
+  }
   console.log(req.body);
 
   // if it is a thirdparty login such as google and facebook
@@ -109,33 +77,27 @@ exports.register = catchAsync(async (req, res, next) => {
     );
   }
 
-  const data = await patient.save();
+  const user = await patient.save();
 
-  console.log(data);
-
-  // console.log(req.body);
-
-  res
-    .status(201)
-    .json({ success: true, message: `Patient ${userRegistered}`, data });
+  //  3) If everything ok, send token to client
+  createSendToken(user, 200, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, isThirdParty } = req.body;
 
-  // Check if email and password exist
-  if (!email || !password) {
-    return next(new AppError(provideEmailPassword, 400));
-  }
   const user = await Patient.findOne({ email }).select("+password");
 
-  console.log(user);
-
-  // Check if user exists && password is correct
-  if (!user || !(await matchEncryptions(password, user.password))) {
+  if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
+  } else if (!user?.isThirdParty) {
+    // Check if user exists && password is correct
+    if (!(await matchEncryptions(password, user.password))) {
+      return next(new AppError(incorrectEmailPassword, 401));
+    }
+  } else if (user.isThirdParty && !user.isVerified) {
+    return next(new AppError(unverified, 401));
   }
-
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
@@ -274,6 +236,22 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
 });
 
+//get patient object if he is logged in
+exports.getPatient = catchAsync(async (req, res, next) => {
+  const user = req.user;
+
+  if (!user) {
+    return next(new AppError(`Patient ${userNotFoundEmail}`, 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "Patient found",
+    data: {
+      user,
+    },
+  });
+});
+
 /******************************************PATIENT ACCOUNT VERIFICATION FUNCTIONALITY*******************************************/
 // verify patient's account
 exports.verifyPatient = catchAsync(async (req, res, next) => {
@@ -391,7 +369,7 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 });
 
 // get the specific patient data
-exports.getPatient = catchAsync(async (req, res, next) => {
+exports.getPatientById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const patient = await Patient.findById(id).select("+password");
   if (!patient) {

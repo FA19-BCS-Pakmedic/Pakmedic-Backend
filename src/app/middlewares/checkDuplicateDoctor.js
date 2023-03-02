@@ -11,20 +11,18 @@ const {
 
 // function to check if there are users with the same email or pmc id
 module.exports = catchAsync(async (req, res, next) => {
-  const { email, pmcID, role } = req.body;
+  const { email, pmcId } = req.body;
   // const { id } = pmc;
   let user;
 
   // if (role === Object.values(ROLES)[1]) {
   const Doctor = db.doctor;
-  user = await Doctor.findOne().or([{ email }, { "pmc.id": pmcID }]);
+  user = await Doctor.findOne().or([{ email }, { "pmc.id": pmcId }]);
+
+  console.log(user);
   if (user) {
-    // deleteFile(req.file.filename, "images");
     return next(new AppError(duplicateDoctor, 409));
   }
-  // } else {
-  //   return next(new AppError(invalidRole, 404));
-  // }
 
   next();
 });

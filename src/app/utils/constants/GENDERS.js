@@ -1,4 +1,1 @@
-module.exports = [
-    "Male",
-    "Female"
-]
+module.exports = ["Male", "Female", "Other"];

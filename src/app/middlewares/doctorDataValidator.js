@@ -21,10 +21,12 @@ module.exports = catchAsync(async (req, res, next) => {
   await body("email").isEmail().withMessage(invalidEmail).run(req);
   // console.log(validationResult(req));
 
-  await body("password")
-    .matches(passwordRegex)
-    .withMessage(invalidPassword)
-    .run(req);
+  if (!req.body.isThirdParty) {
+    await body("password")
+      .matches(passwordRegex)
+      .withMessage(invalidPassword)
+      .run(req);
+  }
   await body("name")
     .matches(stringRegex)
     .withMessage(invalidStringRegex)

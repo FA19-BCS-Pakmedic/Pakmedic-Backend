@@ -16,12 +16,12 @@ const patientSchema = mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, `${requiredError} password`],
+    // required: [true, `${requiredError} password`],
     select: false,
   },
   role: {
     type: String,
-    required: [true, `${requiredError} role`],
+    required: [!this.isThirdParty, `${requiredError} role`],
     enum: Object.values(ROLES),
   },
 
@@ -105,6 +105,12 @@ const patientSchema = mongoose.Schema({
 
   //account verification
   isVerified: {
+    type: Boolean,
+    default: false,
+  },
+
+  //third party authentication
+  isThirdParty: {
     type: Boolean,
     default: false,
   },

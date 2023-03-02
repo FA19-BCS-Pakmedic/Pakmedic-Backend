@@ -39,10 +39,17 @@ module.exports = {
   noReportsFound: "No report/s found",
   containOnlyAlphabets: "Please enter only alphabets",
   noDoctorsInHospital: "No doctors found in this hospital",
+  noCommentsFound: "No comments found",
+  noCommunityFound: "No community found",
+  noPostsFound: "No posts found",
+
   // notLoggedIn: "You are not logged in! Please log in to get access.",
 
   // warning messages
   OTPExpiry: "OTP expires in",
+  OTPExpired: "OTP has expired",
+  OTPIncorrect: "OTP is incorrect",
+  unverified: "Your account is not verified",
 
   // success messages
   databaseConnected: "database is connected",

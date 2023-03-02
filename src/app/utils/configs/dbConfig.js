@@ -3,7 +3,7 @@
 // console.log(process.env.DB_PORT, process.env.DB_HOST, process.env.DB_DATABASE);
 // console.log(process.env.DB_PORT, process.env.DB_HOST, process.env.DB_DATABASE);
 
-module.exports = {
+const dbConf = {
   PORT: process.env.DB_PORT || 8080,
   HOST: process.env.DB_HOST || "localhost",
   DB: process.env.DB_DATABASE || "pakmedic",
@@ -14,3 +14,6 @@ module.exports = {
     useUnifiedTopology: true,
   },
 };
+const connectionString = `mongodb://${dbConf.HOST}:${dbConf.PORT}/${dbConf.DB}`;
+
+module.exports = { dbConf, connectionString };

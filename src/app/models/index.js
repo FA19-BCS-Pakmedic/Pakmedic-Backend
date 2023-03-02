@@ -15,4 +15,7 @@ db.service = require("./Service");
 db.family = require("./Family");
 db.scan = require("./Scan");
 db.report = require("./Report");
+db.community = require("./Community");
+db.comment = require("./Comment");
+db.post = require("./Post");
 module.exports = db;
