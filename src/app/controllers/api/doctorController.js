@@ -150,11 +150,14 @@ exports.register = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password, isThirdParty } = req.body;
 
+  console.log(email, password, isThirdParty);
   // if (!email || !password) {
   //   return next(new AppError(provideEmailPassword, 400));
   // }
 
   const user = await Doctor.findOne({ email }).select("+password");
+
+  console.log(user);
 
   if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
@@ -173,8 +176,6 @@ exports.login = catchAsync(async (req, res, next) => {
 // get doctor if he is logged in
 exports.getDoctor = catchAsync(async (req, res, next) => {
   const user = req.user;
-
-  console.log("GET DOCTOR METHOD: ", user);
 
   if (!user) {
     return next(new AppError(`Doctor ${userNotFoundEmail}`, 404));
@@ -714,8 +715,10 @@ exports.findDoctorByTreatment = catchAsync(async (req, res, next) => {
 /*****************************************E-SIGN FUNCTIONS****************************/
 // add esign file and add the file path to the doctor's document
 exports.addESign = catchAsync(async (req, res, next) => {
-  const id = req.decoded.id;
+  const id = req.user._id;
   const eSign = req.file.filename;
+
+  console.log(req.file);
 
   const doctor = await Doctor.findById(id);
 
@@ -878,48 +881,38 @@ exports.addAvatar = catchAsync(async (req, res, next) => {
 
   await doctor.save();
 
-  
+  res.status(200).json({
+    success: true,
+    message: `Avatar ${successfullyAdded}`,
+    data: {
+      user: doctor,
+    },
+  });
+});
+
+/*********************SIGNATURE***********************************/
+
+//add signature
+exports.addSignature = catchAsync(async (req, res, next) => {
+  console.log(req.file);
+
+  const id = req.user._id;
+
+  const doctor = await Doctor.findById(id);
+
+  if (!doctor) {
+    return next(new AppError(`Doctor ${userNotFound}`, 404));
+  }
+
+  doctor.eSign = req.file.filename;
+
+  await doctor.save();
 
   res.status(200).json({
     success: true,
     message: `Avatar ${successfullyAdded}`,
     data: {
-     user: doctor,
+      user: doctor,
     },
   });
-});
-
-const mongodb = require("mongodb");
-const { connectionString } = require("../../utils/configs/dbConfig");
-
-exports.getAvatar = catchAsync(async (req, res, next) => {
-  const { filename } = req.params;
-
-  try {
-    const client = await mongodb.MongoClient.connect(connectionString, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    const db = client.db();
-    const bucket = new mongodb.GridFSBucket(db, {
-      bucketName: "uploads",
-    });
-
-    const downloadStream = bucket.openDownloadStreamByName(filename);
-
-    downloadStream.on("data", (chunk) => {
-      console.log(chunk);
-      res.write(chunk);
-    });
-
-    downloadStream.on("error", () => {
-      res.sendStatus(404);
-    });
-
-    downloadStream.on("end", () => {
-      res.end();
-    });
-  } catch (err) {
-    throw err;
-  }
 });

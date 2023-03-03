@@ -12,6 +12,7 @@ module.exports = () => {
         const fileInfo = {
           filename: uuid.uuid().split('-')[0] + '-' + file.originalname,
           bucketName: "uploads",
+          
         };
         resolve(fileInfo);
       });

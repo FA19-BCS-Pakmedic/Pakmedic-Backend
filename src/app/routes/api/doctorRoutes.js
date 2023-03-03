@@ -127,12 +127,11 @@ router
 
 router
   .route("/avatar")
-
   .post([uploadSingle()], addAvatar)
   .patch([singleFileUpload("avatar", "images", "avatar")], updateProfileImage)
   .delete(removeProfileImage);
 
-router.get("/avatar/:filename", getAvatar);
+// router.get("/avatar/:filename", getAvatar);
 
 /*******************************DOCTOR's TREATEMENT****************/
 router
@@ -146,8 +145,8 @@ router
 
 /***************************DOCTOR's E-SIGN**************************/
 router
-  .route("/e-signs")
-  .post([singleFileUpload("sign", "images", "e-sign")], addESign)
+  .route("/signatures")
+  .post([uploadSingle()], addESign)
   .get(getESign)
   .delete(removeESign)
   .patch([singleFileUpload("sign", "images", "e-sign")], updateESign);
@@ -158,5 +157,7 @@ router
   .post(addUpdateAbout)
   .patch(addUpdateAbout)
   .delete(removeAbout);
+
+/*******************************DOCTOR's SIGNATURE *********************/
 
 module.exports = router;
