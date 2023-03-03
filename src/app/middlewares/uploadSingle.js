@@ -6,6 +6,7 @@ const upload = multer({ storage: getGridFsStorage() });
 
 module.exports = () => {
   return catchAsync(async (req, res, next) => {
+
     console.log(req);
 
     upload.single("file")(req, res, (err) => {

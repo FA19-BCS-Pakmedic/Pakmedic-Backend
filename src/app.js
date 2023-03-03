@@ -116,6 +116,7 @@ app.use("/api/v1/posts", post);
 app.use("/api/v1/comments", comment);
 app.use("/api/v1/files", file);
 
+
 // any irrelavant end point will hit this and throw error
 app.all("*", (req, res, next) => {
   next(new AppError(`${urlNotFound}: ${req.originalUrl}`, 404));
