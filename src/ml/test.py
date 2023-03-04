@@ -9,6 +9,8 @@ sys.path.insert(0, r'utils')
 from utils import Xray_util as util
 from utils import Retinopathy_util as retinopathy
 from utils import RiskOfDeath_util as riskOfDeath
+from utils import RecommendCompound_util as recommendCompound
+from utils import BrainMRI_util as mriUtil
 
 
 import numpy as np
@@ -54,6 +56,18 @@ def xray():
 
     return buffer
 
+
+@app.route('/brainMRI', methods=['GET'])
+def mri():
+    file = request.query_string.decode('utf-8')
+
+    buffer = mriUtil.results(file)
+
+    # base = BytesIO(base64.decodebytes(buffer))
+    # img = Image.open(base)
+    # img.show()
+    return buffer
+
 @app.route('/retinopathy', methods=['GET'])
 def Retinopathy():
     json  = request.get_json() 
@@ -83,6 +97,21 @@ def RiskOfDeath():
         response = "The Patient is not at Risk of Death"
 
     return response
+
+
+@app.route('/recommendcompound', methods=['GET'])
+def RecommendCompound():
+    json  = request.get_json() 
+
+    data = json['conditions']
+
+    # print(data)
+
+    res = recommendCompound.predict(data)
+
+    print(res)
+
+    return res
     
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

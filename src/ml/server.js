@@ -2,8 +2,8 @@ const express = require("express");
 const request = require("request");
 var fs = require("fs");
 var bodyParser = require("body-parser");
-const cluster = require("cluster");
-const numCPUs = require("os").cpus().length;
+const { Worker } = require("worker_threads");
+const path = require("path");
 
 app = express();
 
@@ -11,17 +11,29 @@ app.use(bodyParser.json());
 
 const PORT = 3000;
 
-app.get("/chestXray", async (req, res) => {
-  request(
-    "http://127.0.0.1:5000/chestXray" + "?" + req.query.name,
-    function (error, response, body) {
-      fs.writeFileSync("ML-Brilliance.png", body, "base64", function (err) {
-        res.send(Error);
-      });
-
-      res.send("Image Saved Successfully.");
+app.get("/brainMRI", async (req, res) => {
+  const worker = new Worker(path.join(__dirname, "/utils/MRI_background.js"), {
+    workerData: { name: req.query.name },
+  });
+  worker.on("message", (message) => {
+    if (message === "done") {
+      console.log("MRI Saved Successfully.");
     }
-  );
+  });
+  res.send("Processing image...");
+});
+
+app.get("/chestXray", async (req, res) => {
+  const worker = new Worker(path.join(__dirname, "/utils/Xray_background.js"), {
+    workerData: { name: req.query.name },
+  });
+
+  worker.on("message", (message) => {
+    if (message === "done") {
+      console.log("XRAY Saved Successfully.");
+    }
+  });
+  res.send("Processing image...");
 });
 
 app.get("/retinopathy", async (req, res) => {
@@ -62,6 +74,19 @@ app.get("/riskOfDeath", async (req, res) => {
   request.get(
     {
       url: "http://127.0.0.1:5000/riskOfDeath",
+      body: req.body,
+      json: true,
+    },
+    function (error, response, body) {
+      res.send(body);
+    }
+  );
+});
+
+app.get("/recommendcompound", async (req, res) => {
+  request.get(
+    {
+      url: "http://127.0.0.1:5000/recommendcompound",
       body: req.body,
       json: true,
     },

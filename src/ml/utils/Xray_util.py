@@ -82,43 +82,7 @@ def compute_gradcam(model, img, image_dir, labels, selected_labels,
             plt.imshow(gradcam, cmap='jet', alpha=min(0.5, predictions[0][i]))
             j += 1
 
-
     fig = plt.gcf()
     buf = fig2img(fig)
     return buf
 
-
-# def get_mean_std_per_batch(image_dir, df, H=320, W=320):
-#     sample_data = []
-#     for img in df.sample(100)["Image"].values:
-#         image_path = os.path.join(image_dir, img)
-#         sample_data.append(
-#             np.array(image.load_img(image_path, target_size=(H, W))))
-#     mean = np.mean(sample_data, axis=(0, 1, 2, 3))
-#     std = np.std(sample_data, axis=(0, 1, 2, 3), ddof=1)
-#     return mean, std
-
-# def get_roc_curve(labels, predicted_vals, generator):
-#     auc_roc_vals = []
-#     for i in range(len(labels)):
-#         try:
-#             gt = generator.labels[:, i]
-#             pred = predicted_vals[:, i]
-#             auc_roc = roc_auc_score(gt, pred)
-#             auc_roc_vals.append(auc_roc)
-#             fpr_rf, tpr_rf, _ = roc_curve(gt, pred)
-#             plt.figure(1, figsize=(10, 10))
-#             plt.plot([0, 1], [0, 1], 'k--')
-#             plt.plot(fpr_rf, tpr_rf,
-#                      label=labels[i] + " (" + str(round(auc_roc, 3)) + ")")
-#             plt.xlabel('False positive rate')
-#             plt.ylabel('True positive rate')
-#             plt.title('ROC curve')
-#             plt.legend(loc='best')
-#         except:
-#             print(
-#                 f"Error in generating ROC curve for {labels[i]}. "
-#                 f"Dataset lacks enough examples."
-#             )
-#     plt.show()
-#     return auc_roc_vals
