@@ -6,3 +6,9 @@ node_modules
 *.lock
 
 nodemon.json
+
+__pycache__
+
+brainMRI_Model.hdf5
+
+*.png
