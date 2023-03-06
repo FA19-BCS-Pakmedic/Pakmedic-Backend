@@ -47,6 +47,7 @@ const {
 //importing models
 const db = require("../../models");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
+const { client, init, getClient } = require("../../utils/helpers/voximplant");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
@@ -142,6 +143,20 @@ exports.register = catchAsync(async (req, res, next) => {
 
   const user = await doctor.save();
 
+  const data = {
+    userName: user.name.replace(" ", "_"),
+    userDisplayName: user.name,
+    userPassword: user._id.toString(),
+    userActive: true,
+    applicationId: "10470602", //TODO: Replace this with variable from .env
+  };
+
+  await init();
+  const client = getClient();
+
+  console.log(client);
+  await client.Users.addUser(data);
+
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });
@@ -154,8 +169,6 @@ exports.login = catchAsync(async (req, res, next) => {
   // if (!email || !password) {
   //   return next(new AppError(provideEmailPassword, 400));
   // }
-
-  const user = await Doctor.findOne({ email }).select("+password");
 
   const user = await Doctor.findOne({ email }).select("+password");
 
