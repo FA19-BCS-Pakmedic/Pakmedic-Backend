@@ -901,7 +901,9 @@ exports.addAvatar = catchAsync(async (req, res, next) => {
     success: true,
     message: `Avatar ${successfullyAdded}`,
     data: {
+
       user: doctor,
+
     },
   });
 });
