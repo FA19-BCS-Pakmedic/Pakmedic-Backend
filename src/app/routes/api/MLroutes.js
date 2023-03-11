@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.get("/brainMRI", MLController.brainMRI);
 router.get("/chestXray", MLController.chestXray);
-router.get("/retinopathy", MLController.retinopathy);
-router.get("/riskOfDeath", MLController.riskOfDeath);
-router.get("/recommendcompound", MLController.recommendcompound);
+router.post("/retinopathy", MLController.retinopathy);
+router.post("/riskOfDeath", MLController.riskOfDeath);
+router.post("/recommendcompound", MLController.recommendcompound);
 
 module.exports = router;

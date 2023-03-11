@@ -45,7 +45,12 @@ exports.retinopathy = catchAsync(async (req, res, next) => {
       json: true,
     },
     function (error, response, body) {
-      res.send(body);
+      res.status(200).json({
+        status: "success",
+        data: {
+          result: body,
+        },
+      });
     }
   );
 });
