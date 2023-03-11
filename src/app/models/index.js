@@ -18,4 +18,5 @@ db.report = require("./Report");
 db.community = require("./Community");
 db.comment = require("./Comment");
 db.post = require("./Post");
+db.message = require("./Message");
 module.exports = db;

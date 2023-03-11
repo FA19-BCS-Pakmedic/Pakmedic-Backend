@@ -583,25 +583,7 @@ exports.removeProfileImage = catchAsync(async (req, res, next) => {
 exports.findDoctorById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
 
-  const doctor = await Doctor.findById(id)
-    .populate({
-      path: "services",
-      model: "Service",
-      populate: {
-        path: "hospital",
-        model: "Hospital",
-        populate: { path: "address", model: "Address" },
-      },
-    })
-    .populate({
-      path: "experiences",
-      model: "Experience",
-      populate: {
-        path: "hospital",
-        model: "Hospital",
-        populate: { path: "address", model: "Address" },
-      },
-    });
+  const doctor = await Doctor.findById(id);
 
   if (!doctor) {
     return next(new AppError(`Doctor ${userNotFound}`, 404));
@@ -610,7 +592,7 @@ exports.findDoctorById = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: {
-      doctor,
+      user: doctor,
     },
   });
 });

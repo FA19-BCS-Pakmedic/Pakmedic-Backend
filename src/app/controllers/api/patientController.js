@@ -388,13 +388,21 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 // get the specific patient data
 exports.getPatientById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
-  const patient = await Patient.findById(id).select("+password");
+
+  console.log(id);
+
+  const patient = await Patient.findById(id);
   if (!patient) {
     return next(new AppError(`patient ${userNotFoundID}`, 404));
   }
+
+  console.log("PATIENT BY ID", patient);
+
   res.status(200).json({
     success: true,
-    data: patient,
+    data: {
+      user: patient,
+    },
   });
 });
 
