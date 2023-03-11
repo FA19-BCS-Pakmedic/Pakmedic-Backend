@@ -157,8 +157,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const user = await Doctor.findOne({ email }).select("+password");
 
-  const user = await Doctor.findOne({ email }).select("+password");
-
   if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
   } else if (!user?.isThirdParty) {

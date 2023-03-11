@@ -8,3 +8,5 @@ node_modules
 nodemon.json
 
 __pycache__
+
+src/ml/ML_models/brainMRI_model.hdf5
