@@ -1,0 +1,12 @@
+env
+.env
+node_modules
+.env.*
+
+*.lock
+
+nodemon.json
+
+__pycache__
+
+src/ml/ML_models/brainMRI_model.hdf5
