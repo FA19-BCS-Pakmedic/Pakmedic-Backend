@@ -19,4 +19,6 @@ db.community = require("./Community");
 db.comment = require("./Comment");
 db.post = require("./Post");
 db.message = require("./Message");
+db.appointment = require("./Appointment");
+
 module.exports = db;

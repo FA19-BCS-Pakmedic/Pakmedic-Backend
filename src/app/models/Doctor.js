@@ -52,6 +52,7 @@ const doctorSchema = mongoose.Schema({
   avatar: {
     type: String,
     // required: [true, `${requiredError} avatar`],
+    default: "default.png",
   },
 
   //pmc data

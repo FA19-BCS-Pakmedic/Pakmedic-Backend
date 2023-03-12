@@ -14,5 +14,6 @@ routers.post = require("./postRoutes");
 routers.community = require("./communityRoutes");
 routers.file = require("./fileRoutes");
 routers.message = require("./messageRoutes");
+routers.appointment = require("./appointmentRoutes");
 
 module.exports = routers;
