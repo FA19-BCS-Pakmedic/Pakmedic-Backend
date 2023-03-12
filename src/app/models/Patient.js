@@ -57,6 +57,7 @@ const patientSchema = mongoose.Schema({
   },
   avatar: {
     type: String,
+    default: "default.png",
   },
 
   //   biological data e.g. weight, height, bloodtype

@@ -39,6 +39,7 @@ const {
 
 //importing models
 const db = require("../../models");
+const { init, getClient } = require("../../utils/helpers/voximplant");
 const Patient = db.patient;
 
 // method to sign up patient
@@ -78,6 +79,22 @@ exports.register = catchAsync(async (req, res, next) => {
   }
 
   const user = await patient.save();
+
+  const data = {
+    userName: `${user.name.replace(" ", "_")}-${user._id
+      .toString()
+      .slice(0, 5)}`,
+    userDisplayName: user.name,
+    userPassword: user._id.toString(),
+    userActive: true,
+    applicationId: "10470602", //TODO: Replace this with variable from .env
+  };
+
+  await init();
+  const client = getClient();
+
+  console.log(client);
+  await client.Users.addUser(data);
 
   //  3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
@@ -371,13 +388,21 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 // get the specific patient data
 exports.getPatientById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
-  const patient = await Patient.findById(id).select("+password");
+
+  console.log(id);
+
+  const patient = await Patient.findById(id);
   if (!patient) {
     return next(new AppError(`patient ${userNotFoundID}`, 404));
   }
+
+  console.log("PATIENT BY ID", patient);
+
   res.status(200).json({
     success: true,
-    data: patient,
+    data: {
+      user: patient,
+    },
   });
 });
 

@@ -133,7 +133,6 @@ router
 
 // router.get("/avatar/:filename", getAvatar);
 
-
 /*******************************DOCTOR's TREATEMENT****************/
 router
   .route("/treatments")

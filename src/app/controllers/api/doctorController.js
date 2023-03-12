@@ -47,6 +47,7 @@ const {
 //importing models
 const db = require("../../models");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
+const { client, init, getClient } = require("../../utils/helpers/voximplant");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
@@ -141,6 +142,20 @@ exports.register = catchAsync(async (req, res, next) => {
   }
 
   const user = await doctor.save();
+
+  const data = {
+    userName: `${user.name.replace(" ", "_")}-${user._id.toString().slice(0, 5)}`,
+    userDisplayName: user.name,
+    userPassword: user._id.toString(),
+    userActive: true,
+    applicationId: "10470602", //TODO: Replace this with variable from .env
+  };
+
+  await init();
+  const client = getClient();
+
+  console.log(client);
+  await client.Users.addUser(data);
 
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
@@ -567,25 +582,7 @@ exports.removeProfileImage = catchAsync(async (req, res, next) => {
 exports.findDoctorById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
 
-  const doctor = await Doctor.findById(id)
-    .populate({
-      path: "services",
-      model: "Service",
-      populate: {
-        path: "hospital",
-        model: "Hospital",
-        populate: { path: "address", model: "Address" },
-      },
-    })
-    .populate({
-      path: "experiences",
-      model: "Experience",
-      populate: {
-        path: "hospital",
-        model: "Hospital",
-        populate: { path: "address", model: "Address" },
-      },
-    });
+  const doctor = await Doctor.findById(id);
 
   if (!doctor) {
     return next(new AppError(`Doctor ${userNotFound}`, 404));
@@ -594,7 +591,7 @@ exports.findDoctorById = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: {
-      doctor,
+      user: doctor,
     },
   });
 });

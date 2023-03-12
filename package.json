@@ -13,6 +13,7 @@
   "dependencies": {
     "@google-cloud/dialogflow": "^5.2.0",
     "@googlemaps/google-maps-services-js": "^3.3.16",
+    "@voximplant/apiclient-nodejs": "^2.1.0",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
@@ -44,6 +45,7 @@
     "pug": "^3.0.2",
     "sib-api-v3-sdk": "^8.4.2",
     "slugify": "^1.6.5",
+    "socket.io": "^4.6.1",
     "stripe": "^10.2.0",
     "uuidv4": "^6.2.13",
     "xss-clean": "^0.1.1"

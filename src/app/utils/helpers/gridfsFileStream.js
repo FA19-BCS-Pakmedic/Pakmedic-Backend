@@ -1,7 +1,6 @@
 const mongodb = require("mongodb");
 const { connectionString } = require("../configs/dbConfig");
 
-
 module.exports = async () => {
   let bucket;
   try {
@@ -10,7 +9,6 @@ module.exports = async () => {
       useUnifiedTopology: true,
     });
     const db = client.db();
-
     bucket = new mongodb.GridFSBucket(db, {
       bucketName: "uploads",
     });
@@ -18,5 +16,4 @@ module.exports = async () => {
     throw err;
   }
   return bucket;
-
 };

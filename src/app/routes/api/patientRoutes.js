@@ -96,7 +96,7 @@ router.patch("/reset-password", [
   resetPassword,
 ]);
 
-router.use(authorizeRole(ROLES[0]));
+// router.use(authorizeRole(ROLES[0])); //TODO: PLACE THIS IN AN APPROPRIATE PLACE
 
 // patient routes to get, update users
 router.route("/:id").get(getPatientById);

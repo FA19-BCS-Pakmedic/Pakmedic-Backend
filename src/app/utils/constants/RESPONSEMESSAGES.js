@@ -42,6 +42,7 @@ module.exports = {
   noCommentsFound: "No comments found",
   noCommunityFound: "No community found",
   noPostsFound: "No posts found",
+  messagesNotFound: "No messages found",
 
   // notLoggedIn: "You are not logged in! Please log in to get access.",
 

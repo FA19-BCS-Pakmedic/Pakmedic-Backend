@@ -1,6 +1,9 @@
 //importing modules
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const http = require("http");
+
+const socketServer = require("./app/socket/socket");
 
 // import utils
 const {
@@ -31,8 +34,12 @@ const { connectionString } = require("./app/utils/configs/dbConfig");
 mongoose.connect(connectionString);
 console.log(databaseConnected);
 
+const server = http.createServer(app);
+
+socketServer(server);
+
 // setting the server to run on a port
-const server = app.listen(serverConf.PORT, () => {
+server.listen(serverConf.PORT, () => {
   console.log(`${serverRunning} ${serverConf.PORT}`);
 });
 
@@ -44,8 +51,6 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
   });
 });
-
-module.exports = { mongoose: mongoose, server };
 
 // process.on("SIGTERM", () => {
 //   console.log("👋 SIGTERM RECEIVED. Shutting down gracefully");
