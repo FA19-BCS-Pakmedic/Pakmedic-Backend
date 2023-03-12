@@ -157,9 +157,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const user = await Doctor.findOne({ email }).select("+password");
 
-
-  const user = await Doctor.findOne({ email }).select("+password");
-
   if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
   } else if (!user?.isThirdParty) {
@@ -177,7 +174,6 @@ exports.login = catchAsync(async (req, res, next) => {
 // get doctor if he is logged in
 exports.getDoctor = catchAsync(async (req, res, next) => {
   const user = req.user;
-
 
   console.log("GET DOCTOR METHOD: ", user);
 
@@ -889,9 +885,9 @@ exports.addAvatar = catchAsync(async (req, res, next) => {
     success: true,
     message: `Avatar ${successfullyAdded}`,
     data: {
-
       user: doctor,
 
+      user: doctor,
     },
   });
 });
