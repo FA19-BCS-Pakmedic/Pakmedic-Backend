@@ -172,7 +172,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
   const user = await Doctor.findOne({ email }).select("+password");
 
-  console.log(user);
   if (!user || (!isThirdParty && !password)) {
     return next(new AppError(incorrectEmailPassword, 401));
   } else if (!user?.isThirdParty) {
@@ -883,9 +882,9 @@ exports.addAvatar = catchAsync(async (req, res, next) => {
     success: true,
     message: `Avatar ${successfullyAdded}`,
     data: {
-
       user: doctor,
 
+      user: doctor,
     },
   });
 });

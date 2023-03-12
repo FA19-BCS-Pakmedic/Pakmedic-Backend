@@ -40,6 +40,7 @@ const {
   community,
   file,
   appointment,
+  ml,
 } = require("./app/routes/api");
 
 // Start express app
@@ -117,6 +118,7 @@ app.use("/api/v1/posts", post);
 app.use("/api/v1/comments", comment);
 app.use("/api/v1/files", file);
 app.use("/api/v1/appointments", appointment);
+app.use("/api/v1/ML", ml);
 
 // any irrelavant end point will hit this and throw error
 app.all("*", (req, res, next) => {

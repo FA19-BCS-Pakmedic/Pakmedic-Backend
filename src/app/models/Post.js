@@ -39,4 +39,16 @@ const PostSchema = new mongoose.Schema({
   },
 });
 
+// pre query to populate the author, and community
+PostSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "author",
+    select: "name",
+  }).populate({
+    path: "community",
+    select: "name",
+  });
+  next();
+});
+
 module.exports = mongoose.model("Post", PostSchema);

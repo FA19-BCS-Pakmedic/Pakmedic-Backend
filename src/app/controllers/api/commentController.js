@@ -18,16 +18,15 @@ const Comment = db.comment;
 
 //add a comment
 exports.addComment = catchAsync(async (req, res, next) => {
-  const { content, authorType } = req.body;
+  const data = req.body;
   const postId = req.params.pid;
   const user = req.user;
 
   //add a new comment
   const comment = new Comment({
-    content: content,
+    ...data,
     author: user?._id,
     post: postId,
-    authorType: authorType,
   });
   await comment.save();
 
