@@ -26,10 +26,10 @@ router.post("/", addCommunity);
 router.get("/", getAllCommunities);
 
 //get a community by id
-router.get("/:cid", getCommunityById);
+router.get("/:id", getCommunityById);
 
 //update a community
-router.patch("/:cid", updateCommunity);
+router.patch("/:id", updateCommunity);
 
 //delete a community
 // router.delete("/:cid", deleteCommunity);
