@@ -19,13 +19,9 @@ const Community = db.community;
 /****************************CRUD OPERATIONS********************************/
 //create a new community
 exports.addCommunity = catchAsync(async (req, res, next) => {
-  const { name, tags, description } = req.body;
+  const data = req.body;
 
-  const community = new Community({
-    name: name,
-    tags: tags,
-    description: description,
-  });
+  const community = new Community(data);
   await community.save();
 
   res.status(201).json({
