@@ -131,4 +131,15 @@ const patientSchema = mongoose.Schema({
   },
 });
 
+// pre populate scans
+patientSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "scans",
+    select: "-__v",
+  });
+  next();
+});
+
+
+
 module.exports = mongoose.model(`Patient`, patientSchema);

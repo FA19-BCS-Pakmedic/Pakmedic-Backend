@@ -14,7 +14,6 @@ const {
   successfullyDeleted,
   noReportsFound,
 } = require("../../utils/constants/RESPONSEMESSAGES");
-const patientRegisterValidator = require("../../middlewares/patientRegisterValidator");
 
 // create report
 exports.createReport = catchAsync(async (req, res, next) => {
@@ -26,17 +25,11 @@ exports.createReport = catchAsync(async (req, res, next) => {
   req.body.image = req.file.filename;
 
   //   extract the data from the body
-  const { title, date, symptoms, lab, image } = req.body;
+  // const { title, date, symptoms, lab, image } = req.body;
+  const data = req.body;
 
   //   create a report object
-  const report = new Report({
-    title,
-    date,
-    symptoms,
-    lab,
-    image,
-    isFamilyReport,
-  });
+  const report = new Report(data);
 
   //   store the report object
   await report.save();
@@ -62,7 +55,7 @@ exports.createReport = catchAsync(async (req, res, next) => {
   // if it is not a report of the family member then push the report to the patient document
   else {
     //get the logged in patient id
-    const id = req.decoded.id;
+    const id = req.user._id;
 
     //   find the patient based on id
     const patient = await Patient.findById(id);

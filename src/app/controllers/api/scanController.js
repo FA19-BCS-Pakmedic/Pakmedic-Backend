@@ -17,25 +17,32 @@ const {
 
 // create scan
 exports.createScan = catchAsync(async (req, res, next) => {
+
+  console.log(req.file);
+
   //   check if the scan is for the family member of the patient
   let isFamilyScan = req.body?.isFamilyScan;
   isFamilyScan = isFamilyScan === "true";
 
+  if(req.file){
   //   extract the saved file name from req and store it in the body
   req.body.image = req.file.filename;
+}
 
   //   extract the data from the body
-  const { title, date, symptoms, lab, image } = req.body;
+  const {title, date, image} = req.body;
+
+
+  console.log(req.body);
 
   //   create a scan object
   const scan = new Scan({
-    title,
-    date,
-    symptoms,
-    lab,
-    image,
-    isFamilyScan,
+    title: JSON.parse(title),
+    date: new Date(JSON.parse(date)),
+    image: image,
   });
+
+
 
   //   store the scan object
   await scan.save();
@@ -61,7 +68,7 @@ exports.createScan = catchAsync(async (req, res, next) => {
   // if it is not a scan of the family member then push the scan to the patient document
   else {
     //get the logged in patient id
-    const id = req.decoded.id;
+    const id = req.user._id;
 
     //   find the patient based on id
     const patient = await Patient.findById(id);
@@ -214,7 +221,7 @@ exports.updateScan = catchAsync(async (req, res, next) => {
   //get scan id
   const id = req.params.id;
 
-  const data = req.body;
+  let data = req.body;
 
   //find the scan
   const scan = await Scan.findByIdAndUpdate(
@@ -246,7 +253,7 @@ exports.updateScan = catchAsync(async (req, res, next) => {
 // delete the scan along with its id in the patient's collection and in the family member's collection
 exports.deleteScan = catchAsync(async (req, res, next) => {
   // get patient id
-  const id = req.decoded.id;
+  const id = req.user._id;
 
   // get scan id
   const scanId = req.params.id;
@@ -260,7 +267,7 @@ exports.deleteScan = catchAsync(async (req, res, next) => {
   }
 
   //   delete the relative scan file !!!! this function will be replaced by multiple files deletion function
-  deleteFile(scan.image, "images");
+  // deleteFile(scan.image, "images");
 
   //delete the scan
   await scan.remove();
