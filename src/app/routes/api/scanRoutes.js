@@ -34,7 +34,7 @@ router.use(verifyToken);
 router.use(authorizeRole(ROLES[0])); // for now it is only accessible to the patient themselves, after implementation of the patient's grant permission to access ehr to the doctor functionality this will be replaced
 
 // create a scan
-router.post("/", [uploadSingle()], createScan); //single file upload should be replaced with multiple files upload issue#42
+router.post("/", createScan); //single file upload should be replaced with multiple files upload issue#42
 
 // search scans by patient id
 router.get("/patients", getScansByPatientId);

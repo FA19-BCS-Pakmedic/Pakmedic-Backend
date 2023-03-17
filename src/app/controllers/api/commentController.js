@@ -10,6 +10,8 @@ const {
 } = require("../../utils/helpers");
 const { noCommentsFound } = require("../../utils/constants/RESPONSEMESSAGES");
 
+const factory = require("./handlerFactory");
+
 //importing models
 const db = require("../../models");
 const Comment = db.comment;
@@ -30,6 +32,19 @@ exports.addComment = catchAsync(async (req, res, next) => {
   });
   await comment.save();
 
+  if (postId) {
+    await Post.findByIdAndUpdate(
+      {
+        _id: postId,
+      },
+      {
+        $push: {
+          comments: comment._id,
+        },
+      }
+    );
+  }
+
   res.status(201).json({
     status: "success",
     data: {
@@ -38,57 +53,63 @@ exports.addComment = catchAsync(async (req, res, next) => {
   });
 });
 
-//get all comments
-exports.getAllComments = catchAsync(async (req, res, next) => {
-  const comments = await Comment.find().populate("author").populate("post");
+exports.getAllComments = factory.getAll(Comment);
 
-  if (comments.length === 0) {
-    return next(new AppError(noCommentsFound, 404));
-  }
+// exports.updateComment = factory.updateOne(Comment);
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      comments,
-    },
-  });
-});
+exports.deleteComment = factory.deleteOne(Comment);
 
-//get comments for a specific post
-exports.getAllCommentsForPost = catchAsync(async (req, res, next) => {
-  const postId = req.params.pid;
+// //get all comments
+// exports.getAllComments = catchAsync(async (req, res, next) => {
+//   const comments = await Comment.find().populate("author").populate("post");
 
-  const comments = await Comment.find({ post: postId })
-    .populate("author")
-    .populate("post");
+//   if (comments.length === 0) {
+//     return next(new AppError(noCommentsFound, 404));
+//   }
 
-  //if no comments are found
-  if (comments.length === 0) {
-    return next(new AppError(noCommentsFound, 404));
-  }
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       comments,
+//     },
+//   });
+// });
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      comments,
-    },
-  });
-});
+// //get comments for a specific post
+// exports.getAllCommentsForPost = catchAsync(async (req, res, next) => {
+//   const postId = req.params.pid;
 
-//delete a comment
-exports.deleteComment = catchAsync(async (req, res, next) => {
-  const commentId = req.params.cid;
+//   const comments = await Comment.find({ post: postId })
+//     .populate("author")
+//     .populate("post");
 
-  const comment = await Comment.findByIdAndDelete(commentId);
+//   //if no comments are found
+//   if (comments.length === 0) {
+//     return next(new AppError(noCommentsFound, 404));
+//   }
 
-  if (!comment) {
-    return next(new AppError("No comment found with that ID", 404));
-  }
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       comments,
+//     },
+//   });
+// });
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      comment,
-    },
-  });
-});
+// //delete a comment
+// exports.deleteComment = catchAsync(async (req, res, next) => {
+//   const commentId = req.params.cid;
+
+//   const comment = await Comment.findByIdAndDelete(commentId);
+
+//   if (!comment) {
+//     return next(new AppError("No comment found with that ID", 404));
+//   }
+
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       comment,
+//     },
+//   });
+// });

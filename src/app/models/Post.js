@@ -25,13 +25,15 @@ const PostSchema = new mongoose.Schema({
     enum: Object.values(ROLES),
     required: [true, `${requiredError} authorType`],
   },
-
-  // comments: [
-  //   {
-  //     type: [mongoose.Schema.Types.ObjectId],
-  //     ref: "Comment",
-  //   },
-  // ],
+  file: {
+    type: String,
+  },
+  comments: [
+    {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Comment",
+    },
+  ],
   community: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, `${requiredError} community`],

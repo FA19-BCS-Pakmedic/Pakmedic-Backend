@@ -18,10 +18,17 @@ const scanSchema = mongoose.Schema({
     type: String,
     required: [true, `${requiredError} image`],
   },
+  
   isFamilyScan: {
     type: Boolean,
     default: false,
+  },
+
+  familyMemberId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Family'
   }
+
 });
 
 module.exports = mongoose.model("Scan", scanSchema);

@@ -136,6 +136,9 @@ patientSchema.pre(/^find/, function (next) {
   this.populate({
     path: "scans",
     select: "-__v",
+  }).populate({
+    path: "reports",
+    select: "-__v",
   });
   next();
 });

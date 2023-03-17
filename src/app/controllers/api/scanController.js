@@ -13,44 +13,39 @@ const {
   successfullyUpdated,
   successfullyDeleted,
   noScansFound,
+  databaseConnected,
 } = require("../../utils/constants/RESPONSEMESSAGES");
 
 // create scan
 exports.createScan = catchAsync(async (req, res, next) => {
-
   console.log(req.file);
 
   //   check if the scan is for the family member of the patient
   let isFamilyScan = req.body?.isFamilyScan;
-  isFamilyScan = isFamilyScan === "true";
 
-  if(req.file){
-  //   extract the saved file name from req and store it in the body
-  req.body.image = req.file.filename;
-}
+  //   if(req.file){
+  //   //   extract the saved file name from req and store it in the body
+  //   req.body.image = req.file.filename;
+  // }
 
-  //   extract the data from the body
-  const {title, date, image} = req.body;
-
+  //   separate familyMemberId from the rest of data
+  const { familyMemberId, ...data } = req.body;
 
   console.log(req.body);
 
   //   create a scan object
-  const scan = new Scan({
-    title: JSON.parse(title),
-    date: new Date(JSON.parse(date)),
-    image: image,
-  });
+  const scan = new Scan(data);
 
-
-
+  if (data.isFamilyScan) {
+    scan.familyMemberId = familyMemberId;
+  }
   //   store the scan object
   await scan.save();
 
   //   if the scan is for the family member
   if (isFamilyScan) {
     // extract the family member id
-    const familyId = req.body.familyId;
+    const familyId = familyMemberId;
 
     //   find the family member based on id
     const family = await Family.findById(familyId);
@@ -221,7 +216,11 @@ exports.updateScan = catchAsync(async (req, res, next) => {
   //get scan id
   const id = req.params.id;
 
-  let data = req.body;
+  let { familyMemberId, ...data } = req.body;
+
+  if (data.isFamilyScan) {
+    data.familyMemberId = familyMemberId;
+  }
 
   //find the scan
   const scan = await Scan.findByIdAndUpdate(
