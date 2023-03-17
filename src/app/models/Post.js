@@ -39,6 +39,10 @@ const PostSchema = new mongoose.Schema({
     required: [true, `${requiredError} community`],
     ref: "Community",
   },
+  isAnonymous: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // pre query to populate the author, and community

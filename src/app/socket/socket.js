@@ -2,6 +2,8 @@ const { Server } = require("socket.io");
 
 const Message = require("../models").message;
 
+const IP = require("../utils/configs").ipConf;
+
 const giftedChatMessages = (messages, sender, receiver) => {
   let giftedMessages;
 
@@ -47,9 +49,7 @@ const giftedChatMessage = (message, sender, receiver) => {
 };
 
 const getAvatarLink = (user) => {
-  return `http://192.168.100.138:8000/api/v1/files/${
-    user.avatar ? user.avatar : "default.png"
-  }`; //TODO: REPLACE THE LINK AND FILE NAME WITH ENV VARIABLES
+  return `${IP}${user.avatar ? user.avatar : "default.png"}`; //TODO: REPLACE THE LINK AND FILE NAME WITH ENV VARIABLES
 };
 
 module.exports = function (server) {
