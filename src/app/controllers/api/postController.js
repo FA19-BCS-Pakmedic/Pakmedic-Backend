@@ -14,6 +14,7 @@ const { noPostsFound } = require("../../utils/constants/RESPONSEMESSAGES");
 const db = require("../../models");
 const Post = db.post;
 const Community = db.community;
+const factory = require("./handlerFactory");
 
 /**************************CRUD OPERATIONS****************** */
 //add a post
