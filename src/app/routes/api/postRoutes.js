@@ -31,16 +31,16 @@ router.post("/:cid", addPost);
 router.get("/", getAllPosts);
 
 //get all posts for a specific community
-router.get("/communities/:cid", getAllPostsForCommunity);
+// router.get("/communities/:cid", getAllPostsForCommunity);
 
 //get a specific post by id
-router.get("/:pid", getPostById);
+router.get("/:id", getPostById);
 
 //update a post
-router.patch("/:pid", updatePost);
+router.patch("/:id", updatePost);
 
 //delete a post by id
-router.delete("/:pid", deletePost);
+router.delete("/:id", deletePost);
 
 // export router
 module.exports = router;
