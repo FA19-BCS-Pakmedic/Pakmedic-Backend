@@ -15,6 +15,8 @@ const db = require("../../models");
 const Post = db.post;
 const Community = db.community;
 
+const factory = require("./handlerFactory");
+
 /**************************CRUD OPERATIONS****************** */
 //add a post
 exports.addPost = catchAsync(async (req, res, next) => {
