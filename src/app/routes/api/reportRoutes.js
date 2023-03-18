@@ -10,6 +10,7 @@ const {
   getReportsOfAllFamilyMembers,
   updateReport,
   deleteReport,
+  test,
 } = require("../../controllers/api/reportController");
 
 // import middlewares
@@ -25,6 +26,8 @@ const ROLES = require("../../utils/constants/ROLES");
 
 // configure router
 const router = express.Router();
+
+// router.get("/test", test);
 
 // authorization
 router.use(verifyToken);

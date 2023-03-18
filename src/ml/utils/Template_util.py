@@ -1,14 +1,16 @@
 import re
 import PyPDF2
-import jsonpickle
+from io import BytesIO
 
 
 def get_data(file, lab_name, lab_type):
     # creating a pdf reader object
-    pdfReader = PyPDF2.PdfReader(file)
+    pdfReader = PyPDF2.PdfReader(BytesIO(file))
 
             # creating a page object
     pageObj = pdfReader.pages[0]
+
+
 
 
     if(lab_name == "shaukat"):
@@ -28,6 +30,8 @@ def blood_chughtai(pageObj):
 
     # extracting text from page
     text = pageObj.extract_text().split('\n')
+
+    print(text)
 
     text_to_search = text[16]
 

@@ -15,6 +15,7 @@ from utils import BrainMRI_util as mriUtil
 from utils import Template_util as template
 
 
+import requests
 
 
 import numpy as np
@@ -116,19 +117,25 @@ def RecommendCompound():
 
     return res
 
-@app.route('/template', methods=['GET'])
+@app.route('/template', methods=['POST'])
 def Template():
-    file = request.files['file']
+    data = request.get_json()
 
-    lab_name = "chughtai"
-    lab_type = "liver"
+    print(data)
 
-    res = template.get_data(file, lab_name, lab_type)
 
-    # create a valid response
+
+    file = requests.get('http://localhost:8000/api/v1/files/'+data['file'])
+
+    print(file._content)
+    
+
+    res = template.get_data(file._content, data['lab_name'], data['lab_type'])
+
     response = jsonpickle.encode(res)
-   
+
     return response
+
     
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
