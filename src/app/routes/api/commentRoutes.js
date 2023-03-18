@@ -23,7 +23,7 @@ router.use(verifyToken);
 /*****************************ROUTES********************************/
 
 // add a comment
-router.post("/:pid", addComment);
+router.post("/:pid/:cid", addComment);
 
 // get all comments
 router.get("/", getAllComments);

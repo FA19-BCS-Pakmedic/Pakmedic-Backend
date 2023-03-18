@@ -15,6 +15,7 @@ const factory = require("./handlerFactory");
 //importing models
 const db = require("../../models");
 const Comment = db.comment;
+const Post = db.post;
 
 /****************************CRUD OPERATIONS********************************/
 
@@ -22,6 +23,7 @@ const Comment = db.comment;
 exports.addComment = catchAsync(async (req, res, next) => {
   const data = req.body;
   const postId = req.params.pid;
+  const commentId = req.params?.cid;
   const user = req.user;
 
   //add a new comment
@@ -29,7 +31,9 @@ exports.addComment = catchAsync(async (req, res, next) => {
     ...data,
     author: user?._id,
     post: postId,
+    authorType: user?.role,
   });
+
   await comment.save();
 
   if (postId) {
@@ -43,6 +47,21 @@ exports.addComment = catchAsync(async (req, res, next) => {
         },
       }
     );
+  }
+
+  if (comment.isReply) {
+    const updatedComment = await Comment.findByIdAndUpdate(
+      {
+        _id: commentId,
+      },
+      {
+        $push: {
+          replies: comment._id,
+        },
+      }
+    );
+
+    console.log(updatedComment);
   }
 
   res.status(201).json({

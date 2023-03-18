@@ -143,6 +143,4 @@ patientSchema.pre(/^find/, function (next) {
   next();
 });
 
-
-
 module.exports = mongoose.model(`Patient`, patientSchema);

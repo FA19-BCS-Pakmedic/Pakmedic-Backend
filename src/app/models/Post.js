@@ -30,7 +30,7 @@ const PostSchema = new mongoose.Schema({
   },
   comments: [
     {
-      type: [mongoose.Schema.Types.ObjectId],
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Comment",
     },
   ],
@@ -49,11 +49,16 @@ const PostSchema = new mongoose.Schema({
 PostSchema.pre(/^find/, function (next) {
   this.populate({
     path: "author",
-    select: "name",
-  }).populate({
-    path: "community",
-    select: "name",
-  });
+    select: "-__v",
+  })
+    .populate({
+      path: "community",
+      select: "name",
+    })
+    .populate({
+      path: "comments",
+      select: "-__v",
+    });
   next();
 });
 
