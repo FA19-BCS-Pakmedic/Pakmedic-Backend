@@ -116,10 +116,15 @@ doctorSchema.pre(/^find/, function (next) {
   this.populate({
     path: "experiences",
     select: "-__v",
-  }).populate({
-    path: "services",
-    select: "-__v",
-  });
+  })
+    .populate({
+      path: "services",
+      select: "-__v",
+    })
+    .populate({
+      path: "communities",
+      select: "-__v",
+    });
   next();
 });
 
