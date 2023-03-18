@@ -74,6 +74,7 @@ exports.joinCommunity = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       community,
+      user,
     },
   });
 });
@@ -111,6 +112,7 @@ exports.leaveCommunity = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       community,
+      user,
     },
   });
 });
