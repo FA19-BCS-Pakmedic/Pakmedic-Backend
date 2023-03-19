@@ -5,8 +5,22 @@ const Patient = require("../../models").patient;
 const Family = require("../../models").family;
 const Report = require("../../models").report;
 
+const axios = require("axios");
+const FormData = require("form-data");
+const fs = require("fs");
+const stream = require("stream");
+const puppeteer = require("puppeteer");
+
+const { LABS_NAME, LABS_TYPE } = require("../../utils/constants/LABS");
+
 // import utils
-const { catchAsync, AppError, deleteFile } = require("../../utils/helpers");
+const {
+  catchAsync,
+  AppError,
+  deleteFile,
+  getGridFsStream,
+  extractData,
+} = require("../../utils/helpers");
 const {
   userNotFound,
   successfullyAdded,
@@ -14,6 +28,8 @@ const {
   successfullyDeleted,
   noReportsFound,
 } = require("../../utils/constants/RESPONSEMESSAGES");
+const template = require("../../utils/helpers/generateTemplate");
+const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 
 // create report
 exports.createReport = catchAsync(async (req, res, next) => {
@@ -21,6 +37,20 @@ exports.createReport = catchAsync(async (req, res, next) => {
   let isFamilyReport = req.body?.isFamilyReport;
 
   const { familyMemberId, ...data } = req.body;
+
+  if (data.file.split(".")[1] === "pdf") {
+    if (
+      data.lab === LABS_NAME.SHAUKAT_LAB ||
+      (data.lab === LABS_NAME.CHUGHTAI_LAB && data.type === LABS_TYPE.BLOOD) ||
+      data.type === LABS_TYPE.LIVER
+    ) {
+      data.file = await extractData({
+        lab_name: data.lab,
+        lab_type: data.type,
+        file: data.file,
+      });
+    }
+  }
 
   //   create a report object
   const report = new Report(data);
