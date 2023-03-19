@@ -12,12 +12,18 @@ const reportSchema = mongoose.Schema({
   },
   date: {
     type: Date,
+    default: new Date(),
   },
   symptoms: {
     type: String,
   },
+  type: {
+    type: String,
+    required: [true, `${requiredError} type`],
+  },
   lab: {
     type: String,
+    required: [true, `${requiredError} lab`],
   },
   file: {
     type: String,
@@ -30,7 +36,7 @@ const reportSchema = mongoose.Schema({
   familyMemberId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Family",
-  }
+  },
 });
 
 module.exports = mongoose.model("Report", reportSchema);
