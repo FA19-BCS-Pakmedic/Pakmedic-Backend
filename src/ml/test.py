@@ -105,11 +105,9 @@ def RecommendCompound():
 
     data = json['conditions']
 
-    # print(data)
 
     res = recommendCompound.predict(data)
 
-    print(res)
 
     return res
     
