@@ -25,6 +25,10 @@ const CommentSchema = new mongoose.Schema({
     type: String,
     enum: Object.values(ROLES),
   },
+  isReply: {
+    type: Boolean,
+    default: false,
+  },
   replies: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -37,10 +41,10 @@ const CommentSchema = new mongoose.Schema({
 CommentSchema.pre(/^find/, function (next) {
   this.populate({
     path: "author",
-    select: "name",
+    select: "-__v",
   }).populate({
     path: "replies",
-    select: "content date author",
+    select: "-__v",
   });
   next();
 });

@@ -144,7 +144,9 @@ exports.register = catchAsync(async (req, res, next) => {
   const user = await doctor.save();
 
   const data = {
-    userName: `${user.name.replace(" ", "_")}-${user._id.toString().slice(0, 5)}`,
+    userName: `${user.name.replace(" ", "_")}-${user._id
+      .toString()
+      .slice(0, 5)}`,
     userDisplayName: user.name,
     userPassword: user._id.toString(),
     userActive: true,

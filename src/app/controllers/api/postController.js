@@ -14,13 +14,12 @@ const { noPostsFound } = require("../../utils/constants/RESPONSEMESSAGES");
 const db = require("../../models");
 const Post = db.post;
 const Community = db.community;
-
 const factory = require("./handlerFactory");
 
 /**************************CRUD OPERATIONS****************** */
 //add a post
 exports.addPost = catchAsync(async (req, res, next) => {
-  const { title, content, authorType, file } = req.body;
+  const { title, content, authorType, file, isAnonymous } = req.body;
   const communityId = req.params.cid;
   const user = req.user;
 
@@ -30,8 +29,9 @@ exports.addPost = catchAsync(async (req, res, next) => {
     content,
     author: user._id,
     community: communityId,
-    authorType,
+    authorType: user.role,
     file,
+    isAnonymous,
   });
 
   await post.save();

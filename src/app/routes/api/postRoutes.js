@@ -42,8 +42,5 @@ router.patch("/:id", updatePost);
 //delete a post by id
 router.delete("/:id", deletePost);
 
-
-
-
 // export router
 module.exports = router;
