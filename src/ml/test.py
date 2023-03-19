@@ -1,6 +1,6 @@
 from flask import Flask,request
 import sys
-import json
+import jsonpickle
 
 app = Flask(__name__)
 
@@ -11,6 +11,11 @@ from utils import Retinopathy_util as retinopathy
 from utils import RiskOfDeath_util as riskOfDeath
 from utils import RecommendCompound_util as recommendCompound
 from utils import BrainMRI_util as mriUtil
+
+from utils import Template_util as template
+
+
+import requests
 
 
 import numpy as np
@@ -98,7 +103,6 @@ def RiskOfDeath():
 
     return response
 
-
 @app.route('/recommendcompound', methods=['GET'])
 def RecommendCompound():
     json  = request.get_json() 
@@ -112,6 +116,27 @@ def RecommendCompound():
     print(res)
 
     return res
+
+@app.route('/template', methods=['POST'])
+def Template():
+    data = request.get_json()
+
+    print(data)
+
+
+
+    file = requests.get('http://localhost:8000/api/v1/files/'+data['file'])
+
+    print(file._content)
+    
+
+    res = template.get_data(file._content, data['lab_name'], data['lab_type'])
+
+    response = jsonpickle.encode(res)
+
+    return response
+
     
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
+
