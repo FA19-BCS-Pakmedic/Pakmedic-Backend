@@ -1,6 +1,10 @@
 from flask import Flask,request
 import sys
 import json
+import requests
+
+from io import BytesIO
+import io
 
 app = Flask(__name__)
 
@@ -11,6 +15,10 @@ from utils import Retinopathy_util as retinopathy
 from utils import RiskOfDeath_util as riskOfDeath
 from utils import RecommendCompound_util as recommendCompound
 from utils import BrainMRI_util as mriUtil
+
+
+from keras.preprocessing import image
+
 
 
 import numpy as np
@@ -34,8 +42,6 @@ labels = ['Cardiomegaly',
 
 to_show = np.array(['Cardiomegaly', 'Edema', 'Mass', 'Pneumothorax'])
 
-
-
 @app.route('/flask', methods=['GET'])
 def flask():
     return "Flask server"
@@ -45,10 +51,15 @@ def xray():
     # load model
 
     file = request.query_string.decode('utf-8')
+
+    image = requests.get('http://localhost:8000/api/v1/files/'+file)
+
+    with open(IMAGE_DIR+'/xray.png', 'wb') as f:
+        f.write(image._content) 
     
     model = util.load_model('ML_models/Xray_model', compile=False)
 
-    buffer = util.compute_gradcam(model, file, IMAGE_DIR, labels, to_show)
+    buffer = util.compute_gradcam(model, 'xray.png', IMAGE_DIR, labels, to_show)
 
     # base = BytesIO(base64.decodebytes(buffer))
     # img = Image.open(base)
@@ -110,6 +121,27 @@ def RecommendCompound():
 
 
     return res
+
+@app.route('/template', methods=['GET'])
+def Template():
     
+    file = requests.get('http://localhost:8000/api/v1/files/'+'edema.png')
+
+    with open(IMAGE_DIR+'/xray.png', 'wb') as f:
+        f.write(file._content) 
+
+    
+
+    x = image.load_img(IMAGE_DIR+"/xray.png", target_size=(320, 320))
+
+    print(x)
+
+    # print(file._content)
+    
+    return "file"
+
+
+
+
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
