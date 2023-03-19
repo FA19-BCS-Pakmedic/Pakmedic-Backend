@@ -23,7 +23,7 @@ def fig2img(fig):
     fig.savefig(buf, bbox_inches='tight')
     buf.seek(0)
     buffer  = base64.b64encode(buf.read())
-    return buffer 
+    return buffer
 
 def load_image(img, image_dir, preprocess=True, H=320, W=320):
     """Load and preprocess image."""
@@ -78,11 +78,10 @@ def compute_gradcam(model, img, image_dir, labels, selected_labels,
             plt.title(f"{labels[i]}: p={predictions[0][i]:.3f}",fontsize=20)
             plt.axis('off')
             plt.imshow(load_image(img, image_dir, preprocess=False),
-                       cmap='gray')
+                    cmap='gray')
             plt.imshow(gradcam, cmap='jet', alpha=min(0.5, predictions[0][i]))
             j += 1
 
     fig = plt.gcf()
     buf = fig2img(fig)
     return buf
-
