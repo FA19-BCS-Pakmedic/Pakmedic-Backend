@@ -7,5 +7,6 @@ configs.serverConf = require("./serverConfig");
 configs.pmcConf = require("./pmcConfig");
 configs.mapsConf = require("./mapsConfig");
 configs.mailConf = require("./mailConfig");
+configs.ipConf = require("./ipConfig");
 configs.dfConf = require("./dfConfig");
 module.exports = configs;
