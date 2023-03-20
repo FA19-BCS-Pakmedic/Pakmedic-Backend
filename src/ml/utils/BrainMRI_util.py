@@ -279,18 +279,18 @@ def visualizeModel(image, label, threshold, loc=(100, 100, 50)):
 #     return model_label_reformatted
 
 def results(file):
-    print(file)
     model = unet_model_3d(loss_function=soft_dice_loss, metrics=[dice_coefficient])
 
     model.load_weights("ML_models/brainMRI_Model.hdf5")
 
-    image1 = load_case("sample_BrainMRI/image1.nii.gz")
+    image1 = load_case("sample_BrainMRI/" + file )
 
     model_label2 = predict(image1, model, .5, loc=(130, 130, 77))     
 
     model_visualize2 = visualizeModel(image1,model_label2,.5, loc=(130, 130, 77))
 
     return model_visualize2
+
 
 
 
