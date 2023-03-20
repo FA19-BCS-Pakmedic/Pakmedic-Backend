@@ -34,6 +34,8 @@ const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 // create report
 exports.createReport = catchAsync(async (req, res, next) => {
   //   check if the report is for the family member of the patient
+
+
   let isFamilyReport = req.body?.isFamilyReport;
 
   const { familyMemberId, ...data } = req.body;

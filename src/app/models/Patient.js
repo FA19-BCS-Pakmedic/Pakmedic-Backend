@@ -55,6 +55,12 @@ const patientSchema = mongoose.Schema({
     // required: [true, `${requiredError} address`],
     // required: [true, `${requiredError} address`],
   },
+
+  location: {
+    type: String,
+    required: [true, `${requiredError} location`],
+  },
+
   avatar: {
     type: String,
     default: "default.png",
