@@ -1,6 +1,10 @@
 from flask import Flask,request
 import sys
 import jsonpickle
+import requests
+
+from io import BytesIO
+import io
 
 app = Flask(__name__)
 
@@ -39,8 +43,6 @@ labels = ['Cardiomegaly',
 
 to_show = np.array(['Cardiomegaly', 'Edema', 'Mass', 'Pneumothorax'])
 
-
-
 @app.route('/flask', methods=['GET'])
 def flask():
     return "Flask server"
@@ -50,10 +52,15 @@ def xray():
     # load model
 
     file = request.query_string.decode('utf-8')
+
+    image = requests.get('http://localhost:8000/api/v1/files/'+file)
+
+    with open(IMAGE_DIR+'/xray.png', 'wb') as f:
+        f.write(image._content) 
     
     model = util.load_model('ML_models/Xray_model', compile=False)
 
-    buffer = util.compute_gradcam(model, file, IMAGE_DIR, labels, to_show)
+    buffer = util.compute_gradcam(model, 'xray.png', IMAGE_DIR, labels, to_show)
 
     # base = BytesIO(base64.decodebytes(buffer))
     # img = Image.open(base)
@@ -109,11 +116,9 @@ def RecommendCompound():
 
     data = json['conditions']
 
-    # print(data)
 
     res = recommendCompound.predict(data)
 
-    print(res)
 
     return res
 
