@@ -145,9 +145,7 @@ exports.register = catchAsync(async (req, res, next) => {
   const user = await doctor.save();
 
   const data = {
-    userName: `${user.name.replace(" ", "_")}-${user._id
-      .toString()
-      .slice(0, 5)}`,
+    userName: `${user._id.toString()}`,
     userDisplayName: user.name,
     userPassword: user._id.toString(),
     userActive: true,
@@ -157,9 +155,8 @@ exports.register = catchAsync(async (req, res, next) => {
   await init();
   const client = getClient();
 
-  console.log(client);
-  await client.Users.addUser(data);
-
+  const response = await client.Users.addUser(data);
+  console.log(response);
   // 3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
 });

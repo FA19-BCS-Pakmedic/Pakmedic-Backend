@@ -81,9 +81,7 @@ exports.register = catchAsync(async (req, res, next) => {
   const user = await patient.save();
 
   const data = {
-    userName: `${user.name.replace(" ", "_")}-${user._id
-      .toString()
-      .slice(0, 5)}`,
+    userName: `${user._id.toString()}`,
     userDisplayName: user.name,
     userPassword: user._id.toString(),
     userActive: true,
