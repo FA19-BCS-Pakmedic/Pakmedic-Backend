@@ -2,6 +2,7 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const http = require("http");
+const path = require("path");
 
 const socketServer = require("./app/socket/socket");
 
@@ -21,7 +22,7 @@ process.on("uncaughtException", (err) => {
 });
 
 //setting the path to the env file
-dotenv.config({ path: "../env/config.env" });
+dotenv.config({ path: path.join(__dirname, "..", "env", "config.env") });
 
 // importing local files
 const app = require("./app");
