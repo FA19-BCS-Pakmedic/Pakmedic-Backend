@@ -18,6 +18,7 @@ const {
   getGridFsStream,
 } = require("../../utils/helpers");
 const { pmcConf } = require("../../utils/configs");
+const factory = require("./handlerFactory");
 const {
   invalidPmcID,
   userRegistered,
@@ -205,6 +206,8 @@ exports.getDoctor = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getAllDoctors = factory.getAll(Doctor);
 
 //method to check whether is already registered and return the
 

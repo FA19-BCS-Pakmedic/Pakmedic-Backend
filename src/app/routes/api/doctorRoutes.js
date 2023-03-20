@@ -33,7 +33,7 @@ const {
   verifyOTP,
   getDoctor,
   addAvatar,
-  getAvatar,
+  getAllDoctors,
   // getAvatar,
 } = require("../../controllers/api/doctorController");
 
@@ -104,6 +104,7 @@ router.get("/hospitals", findDoctorsByHospital);
 router.use(verifyToken);
 
 // find doctors
+router.get("/filter", getAllDoctors);
 router.get("/find", findDoctors);
 router.get("/:id", findDoctorById);
 

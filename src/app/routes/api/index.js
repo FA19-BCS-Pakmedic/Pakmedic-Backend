@@ -16,5 +16,6 @@ routers.file = require("./fileRoutes");
 routers.message = require("./messageRoutes");
 routers.appointment = require("./appointmentRoutes");
 routers.ml = require("./MLroutes");
+routers.notification = require("./notificationRoutes");
 
 module.exports = routers;

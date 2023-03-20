@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./src/server.js"
+    "start": "nodemon ./src/server.js",
+    "python": "cd ./src/ml && python ./test.py"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^6.5.1",
     "express-validator": "^6.14.2",
+    "firebase-admin": "^11.5.0",
     "form-data": "^4.0.0",
     "formidable": "^2.0.1",
     "google-auth-library": "^8.1.1",
