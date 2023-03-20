@@ -25,6 +25,7 @@ import requests
 import numpy as np
 
 IMAGE_DIR = "sample_ChestXray"
+MRI_DIR = "sample_BrainMRI"
 
 labels = ['Cardiomegaly', 
         'Emphysema', 
@@ -73,11 +74,13 @@ def xray():
 def mri():
     file = request.query_string.decode('utf-8')
 
-    buffer = mriUtil.results(file)
+    image = requests.get('http://localhost:8000/api/v1/files/'+file)
 
-    # base = BytesIO(base64.decodebytes(buffer))
-    # img = Image.open(base)
-    # img.show()
+    with open(MRI_DIR+'/mri.nii.gz', 'wb') as f:
+        f.write(image._content) 
+
+    buffer = mriUtil.results('mri.nii.gz')
+
     return buffer
 
 @app.route('/retinopathy', methods=['GET'])
