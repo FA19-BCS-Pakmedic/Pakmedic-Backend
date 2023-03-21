@@ -13,12 +13,25 @@ exports.brainMRI = catchAsync(async (req, res, next) => {
   const worker = new Worker(
     path.join(__dirname, "../../utils/ML/MRI_background.js"),
     {
-      workerData: { name: req.query.name },
+      workerData: { name: req?.query?.name, token: req?.body?.token },
     }
   );
-  worker.on("message", (message) => {
-    if (message === "done") {
-      console.log("MRI Saved Successfully.");
+  worker.on("message", async (message) => {
+    if (message[0] === "done") {
+      await fetch(`http://localhost:8000/api/v1/notifications/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: "Your Results Are Ready",
+          body: "Click here to view your results",
+          tokenID: message[2],
+          image: message[1],
+          navigate: "ResultsScreen",
+        }),
+      });
+      console.log("Notification Sent Successfully.");
     }
   });
   res.send("Processing image...");

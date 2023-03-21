@@ -1,5 +1,4 @@
 const request = require("request");
-const fs = require("fs");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 const uuid = require("uuidv4");
 
@@ -13,7 +12,7 @@ request(url, async (error, response, body) => {
   if (!error && response.statusCode == 200) {
     var buf = Buffer.from(body, "base64");
 
-    const filename = uuid.uuid().split("-")[0] + "-" + "Diagnosis.png";
+    const filename = uuid.uuid().split("-")[0] + "-" + "Xray_Diagnosis.png";
 
     const metadata = {
       author: "Machine Learning",
