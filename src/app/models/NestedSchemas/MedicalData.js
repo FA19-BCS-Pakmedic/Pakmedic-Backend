@@ -3,9 +3,6 @@ module.exports = (mongoose) => {
     allergies: {
       type: [String],
     },
-    surgeries: {
-      type: [String],
-    },
     geneticDiseases: {
       type: [String],
     },

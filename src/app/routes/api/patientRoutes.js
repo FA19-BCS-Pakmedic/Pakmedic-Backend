@@ -109,6 +109,6 @@ router
 router
   .route("/")
   .get(getPatient)
-  .patch([patientRegistrationValidator, fetchAddress], updatePatient)
+  .patch(updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
 module.exports = router;

@@ -362,7 +362,7 @@ const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
 
 //update the patient data
 exports.updatePatient = catchAsync(async (req, res, next) => {
-  id = req.decoded.id;
+  id = req.user._id;
   data = req.body;
   // console.log(req.cookie);
   // console.log(id, data);
@@ -379,7 +379,7 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: updatedPatient,
+    data: { user: updatedPatient },
   });
 });
 
