@@ -9,10 +9,6 @@ const path = require("path");
 
 const admin = require("firebase-admin");
 
-const tokens = [
-  "d8mkybw5Q-2197cC-A2G2S:APA91bENhyyBPGus2pN4D62hS6ipgbk0Ewkf2Zr9Ckhj72eFRaqnODV2lZ-kiqZwbqc4WVAz2Lf3yz5vy9Ai5hQrjl0VGCXYnJa1t73v0CLHcSmKhQzTx4SRShpQI-BbdMrz1CYII-4Q",
-];
-
 exports.registerNotification = catchAsync(async (req, res, next) => {
   const { user, tokenID } = req.body;
 
@@ -59,9 +55,17 @@ exports.updateNotification = catchAsync(async (req, res, next) => {
 
 exports.sendNotification = catchAsync(async (req, res, next) => {
   try {
-    const { title, body, navigate, tokenID, image } = req.body;
+    const { title, body, navigate, tokenID, image, user } = req.body;
 
-    const obj = await Notification.findOne({ token: tokenID });
+    const obj = await Notification.findOne({ user: user });
+
+    console.log(obj);
+
+    if (!obj) {
+      return next(
+        new AppError("No Such User with Notifications Object Found", 404)
+      );
+    }
 
     const notification = {
       title: title ? title : "Results Are Ready!",
