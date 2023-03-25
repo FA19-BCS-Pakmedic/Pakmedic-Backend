@@ -13,7 +13,11 @@ exports.brainMRI = catchAsync(async (req, res, next) => {
   const worker = new Worker(
     path.join(__dirname, "../../utils/ML/MRI_background.js"),
     {
-      workerData: { name: req?.query?.name, token: req?.body?.token },
+      workerData: {
+        name: req?.query?.name,
+        token: req?.body?.token,
+        user: req?.body?.user,
+      },
     }
   );
   worker.on("message", async (message) => {
@@ -26,6 +30,7 @@ exports.brainMRI = catchAsync(async (req, res, next) => {
         body: JSON.stringify({
           title: "Your Results Are Ready",
           body: "Click here to view your results",
+          user: message[3],
           tokenID: message[2],
           image: message[1],
           navigate: "ResultsScreen",
@@ -41,7 +46,11 @@ exports.chestXray = catchAsync(async (req, res, next) => {
   const worker = new Worker(
     path.join(__dirname, "../../utils/ML/Xray_background.js"),
     {
-      workerData: { name: req?.query?.name, token: req?.body?.token },
+      workerData: {
+        name: req?.query?.name,
+        token: req?.body?.token,
+        user: req?.body?.user,
+      },
     }
   );
 
@@ -55,6 +64,7 @@ exports.chestXray = catchAsync(async (req, res, next) => {
         body: JSON.stringify({
           title: "Your Results Are Ready",
           body: "Click here to view your results",
+          user: message[3],
           tokenID: message[2],
           image: message[1],
           navigate: "ResultsScreen",
