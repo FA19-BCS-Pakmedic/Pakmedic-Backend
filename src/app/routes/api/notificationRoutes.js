@@ -7,6 +7,7 @@ router.post("/send", notificationController.sendNotification);
 
 router
   .route("/")
+  .get(notificationController.getNotifications)
   .post(notificationController.registerNotification)
   .patch(notificationController.updateNotification);
 
