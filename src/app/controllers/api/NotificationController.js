@@ -59,8 +59,6 @@ exports.sendNotification = catchAsync(async (req, res, next) => {
 
     const obj = await Notification.findOne({ user: user });
 
-    console.log(obj);
-
     if (!obj) {
       return next(
         new AppError("No Such User with Notifications Object Found", 404)
@@ -105,4 +103,29 @@ exports.sendNotification = catchAsync(async (req, res, next) => {
       .status(err.status || 500)
       .json({ message: err.message || "Something went wrong!" });
   }
+});
+
+exports.getNotifications = catchAsync(async (req, res, next) => {
+  const { user } = req.query;
+
+  const objID = mongoose.Types.ObjectId.isValid(user)
+    ? mongoose.Types.ObjectId(user)
+    : null;
+
+  if (!objID) {
+    return next(new AppError("Invalid User ID", 400));
+  }
+
+  const obj = await Notification.findOne({ user: user });
+
+  if (!obj) {
+    return next(
+      new AppError("No Such User with Notifications Object Found", 404)
+    );
+  }
+
+  return res.status(200).json({
+    status: "success",
+    obj,
+  });
 });
