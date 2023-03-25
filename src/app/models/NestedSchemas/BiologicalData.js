@@ -8,7 +8,7 @@ module.exports = (mongoose) => {
     weight: {
       type: Number,
     },
-    bloodType: {
+    bloodGroup: {
       type: String,
       enum: Object.values(BLOODTYPES),
     },
