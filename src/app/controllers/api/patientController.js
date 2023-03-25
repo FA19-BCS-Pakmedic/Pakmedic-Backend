@@ -479,3 +479,21 @@ exports.removeProfileImage = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.addAvatar = catchAsync(async (req, res, next) => {
+  const id = req.user._id;
+
+  const patient = await Patient.findById(id);
+
+  patient.avatar = req.file.filename;
+
+  await patient.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Patient ${profileImageUpdated}`,
+    data: {
+      patient,
+    },
+  });
+});
