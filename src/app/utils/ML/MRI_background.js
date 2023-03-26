@@ -41,6 +41,11 @@ request(url, async (error, response, body) => {
       console.log(`File ${filename} has been uploaded to MongoDB`);
     });
 
-    parentPort.postMessage(["done", filename, workerData.token]);
+    parentPort.postMessage([
+      "done",
+      filename,
+      workerData.token,
+      workerData.user,
+    ]);
   }
 });

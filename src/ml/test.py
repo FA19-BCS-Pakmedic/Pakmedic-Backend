@@ -64,8 +64,8 @@ def xray():
     buffer = util.compute_gradcam(model, 'xray.png', IMAGE_DIR, labels, to_show)
 
     # base = BytesIO(base64.decodebytes(buffer))
-    # img = Image.open(base)
-    # img.show()
+    # img = Image.opensad(base)
+    # img.show()code .
 
     return buffer
 
