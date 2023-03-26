@@ -69,9 +69,11 @@ module.exports = function (server) {
       socket.join(data.roomID);
 
       //get all the messages from the database with the roomId
-      const messages = await Message.find({ roomId: data.roomId }).sort({
-        createdAt: -1,
-      });
+      const messages = await (
+        await Message.find({ roomID: data.roomID })
+      ).reverse();
+
+      console.log("room in join room event", data.roomID, messages);
 
       // call a method to convert all the messages in a specific format for gifted chat library
       const sender = data.sender;

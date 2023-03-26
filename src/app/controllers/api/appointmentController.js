@@ -1,6 +1,8 @@
 const { AppError, catchAsync } = require("../../utils/helpers");
 const Appointment = require("../../models").appointment;
 
+const factory = require("./handlerFactory");
+
 exports.createAppointment = catchAsync(async (req, res, next) => {
   const data = req.body;
 
@@ -17,15 +19,4 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
 });
 
 // get all appointments for a specfic doctor or patient
-exports.getAllAppointments = catchAsync(async (req, res, next) => {
-  const data = req.body;
-
-  const appointments = await Appointment.find(data);
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      appointments,
-    },
-  });
-});
+exports.getAllAppointments = factory.getAll(Appointment);

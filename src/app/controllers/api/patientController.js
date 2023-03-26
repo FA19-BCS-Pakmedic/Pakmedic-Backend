@@ -81,9 +81,7 @@ exports.register = catchAsync(async (req, res, next) => {
   const user = await patient.save();
 
   const data = {
-    userName: `${user.name.replace(" ", "_")}-${user._id
-      .toString()
-      .slice(0, 5)}`,
+    userName: `${user._id.toString()}`,
     userDisplayName: user.name,
     userPassword: user._id.toString(),
     userActive: true,
@@ -364,7 +362,7 @@ const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
 
 //update the patient data
 exports.updatePatient = catchAsync(async (req, res, next) => {
-  id = req.decoded.id;
+  id = req.user._id;
   data = req.body;
   // console.log(req.cookie);
   // console.log(id, data);
@@ -381,7 +379,7 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: updatedPatient,
+    data: { user: updatedPatient },
   });
 });
 
@@ -476,6 +474,24 @@ exports.removeProfileImage = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: `Patient ${profileImageRemoved}`,
+    data: {
+      patient,
+    },
+  });
+});
+
+exports.addAvatar = catchAsync(async (req, res, next) => {
+  const id = req.user._id;
+
+  const patient = await Patient.findById(id);
+
+  patient.avatar = req.file.filename;
+
+  await patient.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Patient ${profileImageUpdated}`,
     data: {
       patient,
     },
