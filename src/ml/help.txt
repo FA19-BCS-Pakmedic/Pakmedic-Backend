@@ -1,0 +1,9 @@
+
+//To run locally
+
+python test.py --config app/config/config.json
+
+//Make sure to send correct path as your machine URL add a -d if you want to run it in the background
+
+docker pull pakmedic/doctor_assistant_microservice:latest
+docker run -p 5000:5000 -e API_URL=http://192.168.0.102:8000 pakmedic/doctor_assistant_microservice

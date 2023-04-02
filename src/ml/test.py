@@ -5,6 +5,11 @@ import requests
 
 from io import BytesIO
 import io
+import os
+import argparse
+import json
+
+
 
 app = Flask(__name__)
 
@@ -44,6 +49,25 @@ labels = ['Cardiomegaly',
 
 to_show = np.array(['Cardiomegaly', 'Edema', 'Mass', 'Pneumothorax'])
 
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, required=True,
+                        help='path to configuration file')
+    args = parser.parse_args()
+
+    # Read the configuration from the file
+    with open(args.config, 'r') as f:
+        config = json.load(f)
+
+    # Get the URL from the configuration
+    url = config['api_url']
+else:
+    url = os.environ['API_URL']
+
+
+url = url+"/api/v1/files/"
+
 @app.route('/flask', methods=['GET'])
 def flask():
     return "Flask server"
@@ -54,7 +78,7 @@ def xray():
 
     file = request.query_string.decode('utf-8')
 
-    image = requests.get('http://localhost:8000/api/v1/files/'+file)
+    image = requests.get(url+file)
 
     with open(IMAGE_DIR+'/xray.png', 'wb') as f:
         f.write(image._content) 
@@ -74,7 +98,7 @@ def xray():
 def mri():
     file = request.query_string.decode('utf-8')
 
-    image = requests.get('http://localhost:8000/api/v1/files/'+file)
+    image = requests.get(url+file)
 
     with open(MRI_DIR+'/mri.nii.gz', 'wb') as f:
         f.write(image._content) 
@@ -132,8 +156,7 @@ def Template():
     print(data)
 
 
-
-    file = requests.get('http://localhost:8000/api/v1/files/'+data['file'])
+    file = requests.get(url+data['file'])
 
     print(file._content)
     
@@ -146,5 +169,5 @@ def Template():
 
     
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
