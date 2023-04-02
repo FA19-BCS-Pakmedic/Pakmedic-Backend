@@ -16,7 +16,7 @@ const {
 // add a family member
 exports.addFamilyMember = catchAsync(async (req, res, next) => {
   // get the parent id
-  const patientId = req.decoded.id;
+  const patientId = req.user._id;
 
   //   extract data from the body
   const {
@@ -25,10 +25,10 @@ exports.addFamilyMember = catchAsync(async (req, res, next) => {
     relation,
     weight,
     height,
-    bloodType,
-    allergies,
-    surgeries,
-    geneticDiseases,
+    bloodGroup,
+    // allergies,
+    // surgeries,
+    // geneticDiseases,
   } = req.body;
 
   // create a family Object
@@ -36,8 +36,8 @@ exports.addFamilyMember = catchAsync(async (req, res, next) => {
     name,
     age,
     relation,
-    bio: { weight, height, bloodType },
-    medical: { allergies, surgeries, geneticDiseases },
+    bio: { weight, height, bloodGroup },
+    // medical: { allergies, surgeries, geneticDiseases },
   });
 
   // save the family member
@@ -82,28 +82,18 @@ exports.getFamilyMemberById = catchAsync(async (req, res, next) => {
 exports.updateFamilyMember = catchAsync(async (req, res, next) => {
   // get member's id
   const familyId = req.params.id;
+  const userId = req.user._id;
 
   // get the data from the body
-  const {
-    name,
-    age,
-    relation,
-    weight,
-    height,
-    bloodType,
-    allergies,
-    surgeries,
-    geneticDiseases,
-  } = req.body;
+  const data = req.body;
 
-  // update the family member
-  const family = await Family.findByIdAndUpdate(familyId, {
-    name,
-    age,
-    relation,
-    bio: { weight, height, bloodType },
-    medical: { allergies, surgeries, geneticDiseases },
-  });
+  const family = await Family.findByIdAndUpdate(
+    familyId,
+    { $set: data },
+    {
+      new: true,
+    }
+  );
 
   // check if the family member exists
   if (!family) {
@@ -122,7 +112,7 @@ exports.updateFamilyMember = catchAsync(async (req, res, next) => {
 // delete family member
 exports.deleteFamilyMember = catchAsync(async (req, res, next) => {
   // fetch logged in patient id
-  const id = req.decoded.id;
+  const id = req.user._id;
 
   // get the family member id
   const familyId = req.params.id;

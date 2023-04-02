@@ -21,6 +21,7 @@ const {
   updateProfileImage,
   verifyOTP,
   getPatientById,
+  addAvatar,
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -31,6 +32,7 @@ const {
   patientRegistrationValidator,
   fetchAddress,
   singleFileUpload,
+  uploadSingle,
 } = require("../../middlewares");
 
 // import utils
@@ -103,12 +105,13 @@ router.route("/:id").get(getPatientById);
 
 router
   .route("/avatar")
+  .post([uploadSingle()], addAvatar)
   .patch([singleFileUpload("avatar", "images", "avatar")], updateProfileImage)
   .delete(removeProfileImage);
 
 router
   .route("/")
   .get(getPatient)
-  .patch([patientRegistrationValidator, fetchAddress], updatePatient)
+  .patch(updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
 module.exports = router;
