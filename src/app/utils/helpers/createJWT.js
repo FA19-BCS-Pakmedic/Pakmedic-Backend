@@ -10,7 +10,7 @@ module.exports = (user, statusCode, req, res) => {
   // creating a cookie to send back to the user
   res.cookie("jwt", token, {
     // maxAge: new Date(Date.now() + jwtConf.expiresIn * 24 * 60 * 60 * 1000),
-    maxAge: 2 * 60 * 60 * 1000,
+    maxAge: 5 * 60 * 60 * 1000,
     httpOnly: true,
     secure: req.secure || req.headers["x-forwarded-proto"] === "https",
   });
@@ -21,7 +21,7 @@ module.exports = (user, statusCode, req, res) => {
   res.status(statusCode).json({
     status: "success",
     token,
-    user
+    user,
   });
 };
 

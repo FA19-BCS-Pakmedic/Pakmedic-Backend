@@ -135,6 +135,11 @@ const patientSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+
+  //stripe customer id
+  stripeCustomerId: {
+    type: String,
+  },
 });
 
 // pre populate scans
