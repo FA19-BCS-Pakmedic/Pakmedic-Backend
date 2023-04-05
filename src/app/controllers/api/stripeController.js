@@ -126,13 +126,21 @@ exports.getAllInvoices = catchAsync(async (req, res) => {
 });
 
 exports.payForService = catchAsync(async (req, res) => {
-  const { customerId, price } = req.body;
+  const customerId = req.params.id;
+  const { price, metadata } = req.body;
+
+  const customer = await stripe.stripeClient.customers.retrieve(customerId);
+  const defaultPaymentMethod = customer.invoice_settings.default_payment_method;
 
   const paymentIntent = await stripe.stripeClient.paymentIntents.create({
-    amount: price,
-    currency: "usd",
+    amount: price * 100,
+    currency: "pkr",
     customer: customerId,
+    payment_method: defaultPaymentMethod,
     payment_method_types: ["card"],
+    metadata,
+    off_session: true,
+    confirm: true,
   });
 
   if (!paymentIntent) {
@@ -143,6 +151,56 @@ exports.payForService = catchAsync(async (req, res) => {
     status: "success",
     data: {
       paymentIntent,
+    },
+  });
+});
+
+exports.refundPayment = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { amount } = req.body;
+
+  const refund = await stripe.stripeClient.refunds.create({
+    payment_intent: id,
+    amount: amount * 100, // amount to be refunded, in cents
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      refund,
+    },
+  });
+});
+
+exports.getCustomerPayments = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const payments = await stripe.stripeClient.paymentIntents.list({
+    customer: id,
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      payments: payments.data,
+    },
+  });
+});
+
+exports.getPaymentsReceived = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  let payments = await stripe.stripeClient.paymentIntents.list();
+
+  // get all the payments with metadata.doctorId === id
+  payments = payments.data.filter(
+    (payment) => payment.metadata.doctorId === id
+  );
+
+  return res.status(200).json({
+    status: "success",
+    data: {
+      payments: payments,
     },
   });
 });
