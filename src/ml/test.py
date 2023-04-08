@@ -10,6 +10,11 @@ import argparse
 import json
 
 
+import os
+import argparse
+import json
+
+
 
 app = Flask(__name__)
 
@@ -48,6 +53,25 @@ labels = ['Cardiomegaly',
         'Consolidation']
 
 to_show = np.array(['Cardiomegaly', 'Edema', 'Mass', 'Pneumothorax'])
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=str, required=True,
+                        help='path to configuration file')
+    args = parser.parse_args()
+
+    # Read the configuration from the file
+    with open(args.config, 'r') as f:
+        config = json.load(f)
+
+    # Get the URL from the configuration
+    url = config['api_url']
+else:
+    url = os.environ['API_URL']
+
+
+url = url+"/api/v1/files/"
 
 
 if __name__ == '__main__':
@@ -185,5 +209,6 @@ def Template():
         return {"error": str(e)}, 500
     
 if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=True)
     app.run(host='0.0.0.0', port=5000, debug=True)
 
