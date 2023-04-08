@@ -74,99 +74,115 @@ def flask():
 
 @app.route('/chestXray', methods=['GET'])
 def xray():
-    # load model
+    try:
 
-    file = request.query_string.decode('utf-8')
+        file = request.query_string.decode('utf-8')
 
-    image = requests.get(url+file)
+        image = requests.get(url+file)
 
-    with open(IMAGE_DIR+'/xray.png', 'wb') as f:
-        f.write(image._content) 
-    
-    model = util.load_model('ML_models/Xray_model', compile=False)
+        with open(IMAGE_DIR+'/xray.png', 'wb') as f:
+            f.write(image._content) 
+        
+        model = util.load_model('ML_models/Xray_model', compile=False)
 
-    buffer = util.compute_gradcam(model, 'xray.png', IMAGE_DIR, labels, to_show)
+        buffer = util.compute_gradcam(model, 'xray.png', IMAGE_DIR, labels, to_show)
 
-    # base = BytesIO(base64.decodebytes(buffer))
-    # img = Image.opensad(base)
-    # img.show()code .
-
-    return buffer
+        return buffer
+        
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 
 @app.route('/brainMRI', methods=['GET'])
 def mri():
-    file = request.query_string.decode('utf-8')
+    try:
+        file = request.query_string.decode('utf-8')
 
-    image = requests.get(url+file)
+        image = requests.get(url+file)
 
-    with open(MRI_DIR+'/mri.nii.gz', 'wb') as f:
-        f.write(image._content) 
+        with open(MRI_DIR+'/mri.nii.gz', 'wb') as f:
+            f.write(image._content) 
 
-    buffer = mriUtil.results('mri.nii.gz')
+        buffer = mriUtil.results('mri.nii.gz')
 
-    return buffer
+        return buffer
+    
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.route('/retinopathy', methods=['GET'])
 def Retinopathy():
-    json  = request.get_json() 
+    try:
+        json  = request.get_json() 
 
-    data = json['user']
+        data = json['user']
 
-    res = retinopathy.predict(data)
+        res = retinopathy.predict(data)
 
-    if(res==1):
-        response = "The Patient has been diagonsed with Diabetic Retinopathy"
-    else : 
-        response = "The Patient has not been diagonsed with Diabetic Retinopathy"
+        if(res==1):
+            response = "The Patient has been diagonsed with Diabetic Retinopathy"
+        else : 
+            response = "The Patient has not been diagonsed with Diabetic Retinopathy"
 
-    return response
+        return response
+    
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.route('/riskOfDeath', methods=['GET'])
 def RiskOfDeath():
-    json  = request.get_json() 
+    try:
+        json  = request.get_json() 
 
-    data = json['user']
+        data = json['user']
 
-    res = riskOfDeath.predict(data)
+        res = riskOfDeath.predict(data)
 
-    if(res==1):
-        response = "The Patient is at Risk of Death"
-    else : 
-        response = "The Patient is not at Risk of Death"
+        if(res==1):
+            response = "The Patient is at Risk of Death"
+        else : 
+            response = "The Patient is not at Risk of Death"
 
-    return response
+        return response
+
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.route('/recommendcompound', methods=['GET'])
 def RecommendCompound():
-    json  = request.get_json() 
+    try:
+        json  = request.get_json() 
 
-    data = json['conditions']
+        data = json['conditions']
 
+        res = recommendCompound.predict(data)
 
-    res = recommendCompound.predict(data)
+        return res
 
-
-    return res
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 @app.route('/template', methods=['POST'])
 def Template():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    print(data)
+        print(data)
 
 
-    file = requests.get(url+data['file'])
+        file = requests.get(url+data['file'])
 
-    print(file._content)
+        print(file._content)
+        
+
+        res = template.get_data(file._content, data['lab_name'], data['lab_type'])
+
+        response = jsonpickle.encode(res)
+
+        return response
     
-
-    res = template.get_data(file._content, data['lab_name'], data['lab_type'])
-
-    response = jsonpickle.encode(res)
-
-    return response
-
+    except Exception as e:
+        return {"error": str(e)}, 500
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

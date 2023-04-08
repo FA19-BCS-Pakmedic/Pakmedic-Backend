@@ -1,0 +1,7 @@
+pip install matplotlib ==3.2.1
+pip install nltk==3.2.4
+pip install pandas==1.0.3
+pip install tensorflow==2.0.0
+pip install numpy==1.18.2
+pip install transformers==2.5.1
+pip install flask
