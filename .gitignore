@@ -16,4 +16,4 @@ brainMRI_Model.hdf5
 src/ml/ML_models/brainMRI_model.hdf5
 
 
-# src/BERT/models/*
+src/BERT/models/*
