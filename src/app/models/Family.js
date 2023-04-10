@@ -19,7 +19,7 @@ const FamilySchema = mongoose.Schema({
     enum: RELATIONS,
   },
   age: {
-    type: Number,
+    type: String,
     required: [true, `${requiredError} age`],
   },
   //   biological data e.g. weight, height, bloodtype
@@ -28,12 +28,12 @@ const FamilySchema = mongoose.Schema({
   },
 
   // medical data e.g. allergies, medications, surgeries, conditions, etc.
-  medical: {
-    type: medicalSchema,
-  },
-  appointments: [
-    //this will be replaced with appointment embedded doc
-  ],
+  // medical: {
+  //   type: medicalSchema,
+  // },
+  // appointments: [
+  //   //this will be replaced with appointment embedded doc
+  // ],
   scans: [
     {
       type: mongoose.Schema.Types.ObjectId,

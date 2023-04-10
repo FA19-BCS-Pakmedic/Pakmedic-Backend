@@ -23,7 +23,7 @@ module.exports = {
   urlNotFound: "The URL does not exist",
   requiredError: "Please enter a/an ",
   duplicateDoctor: "This email or PMC id is already registered",
-  duplicatePatient: "This email or cnic is already registered",
+  duplicatePatient: "This email is already registered",
   duplicateEmail: "Email is already in use",
   duplicateCnic: "Cnic is already in use",
   duplicatePmcID: "Pmc ID is already in use",

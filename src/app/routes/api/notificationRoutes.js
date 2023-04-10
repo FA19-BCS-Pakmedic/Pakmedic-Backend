@@ -4,7 +4,11 @@ const notificationController = require("../../controllers/api/NotificationContro
 const router = express.Router();
 
 router.post("/send", notificationController.sendNotification);
-router.post("/register", notificationController.registerNotification);
-router.post("/update", notificationController.updateNotification);
+
+router
+  .route("/")
+  .get(notificationController.getNotifications)
+  .post(notificationController.registerNotification)
+  .patch(notificationController.updateNotification);
 
 module.exports = router;

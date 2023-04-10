@@ -8,5 +8,6 @@ router.post("/chestXray", MLController.chestXray);
 router.post("/retinopathy", MLController.retinopathy);
 router.post("/riskOfDeath", MLController.riskOfDeath);
 router.post("/recommendcompound", MLController.recommendcompound);
+router.post("/bert", MLController.bert);
 
 module.exports = router;

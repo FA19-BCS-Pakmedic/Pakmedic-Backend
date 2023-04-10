@@ -1,0 +1,39 @@
+# Use an official Python runtime as a parent image
+FROM python:3.6.5
+
+# Set the working directory to /bert
+WORKDIR /BERT
+
+# Upgrade pip
+RUN python -m pip install --upgrade pip
+
+# Install libraries
+RUN pip install matplotlib==3.2.1
+
+RUN pip install nltk==3.2.4
+
+RUN pip install pandas==1.0.3
+
+RUN pip install numpy==1.18.2
+
+RUN pip install flask
+
+RUN pip install tensorflow==2.0.0
+
+RUN pip install h5py==2.10.0 --force-reinstall
+
+RUN pip install transformers==2.5.1
+
+# Copy the current directory contents into the container at /ml
+COPY . /BERT
+
+# Set the environment variable
+ENV FLASK_APP test.py
+
+# Expose port 8080
+EXPOSE 5001
+
+ENV CONFIG_PATH="app/config/config.json"
+
+# Run the command to start Flask
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]
