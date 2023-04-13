@@ -140,6 +140,18 @@ const patientSchema = mongoose.Schema({
   stripeCustomerId: {
     type: String,
   },
+
+  ehrAccess: [
+    {
+      doctor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Doctor",
+      },
+      accessEndDate: {
+        type: Date,
+      },
+    },
+  ],
 });
 
 // pre populate scans

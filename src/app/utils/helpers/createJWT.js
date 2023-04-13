@@ -5,7 +5,7 @@ const { jwtConf } = require("../../utils/configs");
 // method to send a token along with payload to user as a response to login request
 module.exports = (user, statusCode, req, res) => {
   // create token
-  const token = signToken(user);
+  const token = signToken(user, '1d');
 
   // creating a cookie to send back to the user
   res.cookie("jwt", token, {

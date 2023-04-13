@@ -20,5 +20,6 @@ db.comment = require("./Comment");
 db.post = require("./Post");
 db.message = require("./Message");
 db.appointment = require("./Appointment");
+db.appointmentReq = require("./AppointmentRequest");
 
 module.exports = db;

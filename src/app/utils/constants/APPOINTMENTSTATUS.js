@@ -1,1 +1,1 @@
-module.exports = ["pending", "upcoming", "completed", "cancelled"];
+module.exports = ["upcoming", "completed", "cancelled"];

@@ -18,5 +18,6 @@ routers.appointment = require("./appointmentRoutes");
 routers.ml = require("./MLroutes");
 routers.notification = require("./notificationRoutes");
 routers.stripe = require("./stripeRoutes");
+routers.appointmentRequest = require("./appointmentRequestRoutes");
 
 module.exports = routers;
