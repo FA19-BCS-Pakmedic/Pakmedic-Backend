@@ -1,0 +1,25 @@
+
+//To run locally
+
+python test.py --config app/config/config.json
+
+//Running with docker image 
+
+//Make sure to send correct path as your machine URL add a -d if you want to run it in the background
+
+//Make sure to replace API url with your ipconfig url localhost
+
+docker pull pakmedic/doctor_assistant_microservice:latest
+docker run -p 5000:5000 -e API_URL=http://192.168.0.101:8000 pakmedic/doctor_assistant_microservice
+
+
+//Make changes in code and repush images? 
+
+->Prerequisites
+1. Docker installed
+2. Docker hub account (pakmedic INC)
+3. Download models folder from pakmedic drive models
+
+
+docker build -t pakmedic/doctor_assistant_microservice .
+docker push 
