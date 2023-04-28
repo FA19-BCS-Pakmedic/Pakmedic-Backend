@@ -42,6 +42,8 @@ const {
   appointment,
   ml,
   notification,
+  stripe,
+  appointmentRequest,
 } = require("./app/routes/api");
 
 // Start express app
@@ -130,6 +132,8 @@ app.use("/api/v1/files", file);
 app.use("/api/v1/appointments", appointment);
 app.use("/api/v1/ML", ml);
 app.use("/api/v1/notifications", notification);
+app.use("/api/v1/stripe", stripe);
+app.use("/api/v1/appointments/requests", appointmentRequest);
 
 // any irrelavant end point will hit this and throw error
 app.all("*", (req, res, next) => {
