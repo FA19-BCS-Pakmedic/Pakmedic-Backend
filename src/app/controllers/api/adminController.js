@@ -110,21 +110,38 @@ const totalReports = await Report.countDocuments();
 
 // top specialties
 
-const result = await Doctor.aggregate([
+const specialtyQueryResult = await Doctor.aggregate([
     { $group: { _id: "$speciality", count: { $sum: 1 } } },
     { $sort: { count: -1 } }
   ]);
 
   const specialties = [];
-  const counts = [];
+  const specialtiesCount = [];
 
-  result.forEach((specialtyCount) => {
+  specialtyQueryResult.forEach((specialtyCount) => {
     specialties.push(specialtyCount._id);
-    counts.push(specialtyCount.count);
+    specialtiesCount.push(specialtyCount.count);
   });
 
 
-  
+//   top diseases
+
+const diseaseQueryResult = await Doctor.aggregate([
+    { $unwind: "$treatments" },
+    { $group: { _id: "$treatments", count: { $sum: 1 } } },
+    { $sort: { _id: 1 } }
+  ]);
+
+//   console.log(diseaseQueryResult);
+
+const diseases = [];
+const diseasesCount = [];
+
+diseaseQueryResult.forEach((diseaseCount) => {
+  diseases.push(diseaseCount._id);
+  diseasesCount.push(diseaseCount.count);
+});
+
 
 
   
@@ -141,7 +158,10 @@ const result = await Doctor.aggregate([
       totalAppointments,
       totalReports,
       specialties,
-        specialtiesCount: counts,
+        specialtiesCount,
+         diseases,
+        diseasesCount
+
     },
   });
   
