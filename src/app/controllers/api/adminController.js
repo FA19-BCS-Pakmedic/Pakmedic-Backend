@@ -173,7 +173,9 @@ diseaseQueryResult.forEach((diseaseCount) => {
       specialties,
         specialtiesCount,
          diseases,
-        diseasesCount
+        diseasesCount,
+        topDoctors: doctorQueryResult,
+        
 
     },
   });
