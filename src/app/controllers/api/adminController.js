@@ -129,7 +129,8 @@ const specialtyQueryResult = await Doctor.aggregate([
 const diseaseQueryResult = await Doctor.aggregate([
     { $unwind: "$treatments" },
     { $group: { _id: "$treatments", count: { $sum: 1 } } },
-    { $sort: { _id: 1 } }
+    { $sort: { _id: 1 } },
+    {$limit: 15}
   ]);
 
 //   console.log(diseaseQueryResult);
@@ -143,6 +144,18 @@ diseaseQueryResult.forEach((diseaseCount) => {
 });
 
 
+
+  // list of top doctors
+
+  const doctorQueryResult = await Doctor.aggregate([
+    { $lookup: { from: 'reviews', localField: '_id', foreignField: 'doctor', as: 'reviews' } },
+    { $addFields: { avgRating: { $avg: '$reviews.ratings' }, reviewCount: { $size: '$reviews' } } },
+    { $sort: { avgRating: -1, reviewCount: -1 } },
+    { $limit: 10 }
+  ])
+
+  console.log(doctorQueryResult);
+  
 
   
   

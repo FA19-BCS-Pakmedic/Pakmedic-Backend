@@ -80,9 +80,12 @@ const doctorSchema = mongoose.Schema({
   communities: {
     type: [String],
   },
-  reviews: {
-    type: [String],
-  },
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review"
+    },
+  ],
 
   //account verification
   isVerified: {

@@ -20,5 +20,6 @@ routers.notification = require("./notificationRoutes");
 routers.stripe = require("./stripeRoutes");
 routers.appointmentRequest = require("./appointmentRequestRoutes");
 routers.admin = require("./adminRoutes");
+routers.review = require("./reviewRoutes");
 
 module.exports = routers;
