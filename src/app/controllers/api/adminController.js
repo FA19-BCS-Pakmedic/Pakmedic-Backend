@@ -2,18 +2,14 @@ const { AppError, catchAsync } = require("../../utils/helpers");
 const Appointment = require("../../models").appointment;
 const Doctor = require("../../models").doctor;
 const Patient = require("../../models").patient;
-const Report = require("../../models").report;
-const AppointmentRequests = require("../../models").appointmentReq;
-
+const Complaint = require("../../models").complaint;
+const Review = require('../../models').review;
+// const AppointmentRequests = require("../../models").appointmentReq;
+const mongoose = require("mongoose");
 
 const APIFeatures = require("../../utils/helpers/apiFeatures");
 
-
-
-
 exports.getDashboardStats = catchAsync(async(req, res, next) => {
-
-
 
     // appointments by month
     const currentYear = new Date().getFullYear();
@@ -103,11 +99,11 @@ exports.getDashboardStats = catchAsync(async(req, res, next) => {
 
 
 
-//   total doctors, patients, booked appointments, reports
+//   total doctors, patients, booked appointments, complaints
 const totalDoctors = await Doctor.countDocuments();
 const totalPatients = await Patient.countDocuments();
 const totalAppointments = await Appointment.countDocuments();
-const totalReports = await Report.countDocuments();
+const totalComplaints = await Complaint.countDocuments();
 
 
 // top specialties
@@ -166,7 +162,7 @@ diseaseQueryResult.forEach((diseaseCount) => {
       totalDoctors,
       totalPatients,
       totalAppointments,
-      totalReports,
+      totalComplaints,
       specialties,
         specialtiesCount,
          diseases,
@@ -197,41 +193,6 @@ diseaseQueryResult.forEach((diseaseCount) => {
       });
 
   });
-
-
-  exports.getAllReports = catchAsync(async(req, res) => {
-   
-    const reports = await filterHandler(Report, req.query);
-
-    res.status(200).json({
-
-        status: "success",
-        data: {
-          complaints,
-        },
-
-      });
-
-
-
-
-  });
-
-
-  exports.getAllAppointmentRequests = catchAsync(async(req, res) => {
-
-    const appointmentRequests = await filterHandler(AppointmentRequests, req.query);
-
-    res.status(200).json({
-
-        status: "success",
-        data: {
-          appointmentRequests,
-        },
-
-      });
-  });
-
 
   exports.getDoctorData = catchAsync(async(req, res) => {
 

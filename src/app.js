@@ -46,6 +46,7 @@ const {
   appointmentRequest,
   admin: Admin,
   review,
+  complaint
 } = require("./app/routes/api");
 
 // Start express app
@@ -138,6 +139,7 @@ app.use("/api/v1/stripe", stripe);
 app.use("/api/v1/appointments/requests", appointmentRequest);
 app.use("/api/v1/admin", Admin);
 app.use("/api/v1/reviews", review);
+app.use("/api/v1/complaints", complaint);
 
 // any irrelavant end point will hit this and throw error
 app.all("*", (req, res, next) => {
