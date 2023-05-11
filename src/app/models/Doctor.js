@@ -112,6 +112,18 @@ const doctorSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+
+  status: {
+    type: String,
+    enum: ["active", "blocked", "warned", "inactive"],
+    default: "active",
+  },
+
+  joined: {
+    type: Date,
+    default: Date.now(),
+  }
+
 });
 
 // pre function to prepopulate before find query

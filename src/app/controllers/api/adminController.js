@@ -3,9 +3,11 @@ const Appointment = require("../../models").appointment;
 const Doctor = require("../../models").doctor;
 const Patient = require("../../models").patient;
 const Report = require("../../models").report;
+const AppointmentRequests = require("../../models").appointmentReq;
 
 
-const factory = require("./handlerFactory");
+const APIFeatures = require("../../utils/helpers/apiFeatures");
+
 
 
 
@@ -153,11 +155,6 @@ diseaseQueryResult.forEach((diseaseCount) => {
     { $sort: { avgRating: -1, reviewCount: -1 } },
     { $limit: 10 }
   ])
-
-  console.log(doctorQueryResult);
-  
-
-  
   
   res.status(200).json({
     status: "success",
@@ -175,12 +172,158 @@ diseaseQueryResult.forEach((diseaseCount) => {
          diseases,
         diseasesCount,
         topDoctors: doctorQueryResult,
-        
-
     },
   });
   
-  
-  
-  
   })
+
+
+  exports.getAllUsers = catchAsync(async(req, res, next) => {
+
+    const patients = await filterHandler(Patient, req.query);
+
+    const doctors = await filterHandler(Doctor, req.query);
+    
+  
+    console.log(patients, doctors);
+
+    res.status(200).json({
+
+        status: "success",
+        data: {
+          users: [...patients, ...doctors],
+        },
+
+      });
+
+  });
+
+
+  exports.getAllReports = catchAsync(async(req, res) => {
+   
+    const reports = await filterHandler(Report, req.query);
+
+    res.status(200).json({
+
+        status: "success",
+        data: {
+          complaints,
+        },
+
+      });
+
+
+
+
+  });
+
+
+  exports.getAllAppointmentRequests = catchAsync(async(req, res) => {
+
+    const appointmentRequests = await filterHandler(AppointmentRequests, req.query);
+
+    res.status(200).json({
+
+        status: "success",
+        data: {
+          appointmentRequests,
+        },
+
+      });
+  });
+
+
+  exports.getDoctorData = catchAsync(async(req, res) => {
+
+    const doctorId = req.params.id;
+
+      const doctor = await Doctor.findById(doctorId).lean();
+  
+      if (!doctor) {
+        return res.status(404).json({ error: 'Doctor not found' });
+      }
+  
+      const reviewCount = await Review.countDocuments({ doctor: doctorId });
+      const averageRating = await Review.aggregate([
+        { $match: { doctor: mongoose.Types.ObjectId(doctorId) } },
+        { $group: { _id: null, avgRating: { $avg: '$ratings' } } }
+      ]);
+  
+      const appointmentCount = await Appointment.aggregate([
+        { $match: { doctor: mongoose.Types.ObjectId(doctorId) } },
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+  
+      const appointments = {
+        completed: 0,
+        pending: 0,
+        cancelled: 0
+      };
+  
+      appointmentCount.forEach((item) => {
+        if (item._id === 'completed') {
+          appointments.completed = item.count;
+        } else if (item._id === 'pending') {
+          appointments.pending = item.count;
+        } else if (item._id === 'cancelled') {
+          appointments.cancelled = item.count;
+        }
+      });
+  
+      const result = {
+        ...doctor,
+        reviewCount,
+        averageRating: averageRating[0] ? averageRating[0].avgRating : 0,
+        appointments
+      };
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          result,
+        },
+      });
+
+  });
+
+
+  const filterHandler = async(Model, query) => {
+
+     // To allow for nested GET reviews on tour (hack)
+     let filter = {};
+     // if (req.params.tourId) filter = { tour: req.params.tourId };
+    //  console.log(req.query);
+ 
+     const features = new APIFeatures(Model.find(filter), query)
+       .filter()
+       .sort()
+       .limitFields()
+       .paginate();
+     // const doc = await features.query.explain();
+     const doc = await features.query;
+ 
+    //  // SEND RESPONSE
+    //  res.status(200).json({
+    //    status: "success",
+    //    results: doc.length,
+    //    data: {
+    //      data: doc,
+    //    },
+    //  });
+
+
+    // return {
+    //     status: "success",
+    //     results: doc.length,
+    //     data: {
+    //       data: doc,
+    //     },
+    // }
+
+    return doc;
+  }
