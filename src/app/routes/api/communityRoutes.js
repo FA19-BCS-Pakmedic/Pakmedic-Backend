@@ -21,7 +21,7 @@ const router = express.Router();
 
 /***********************ROUTES*********************/
 
-router.use(verifyToken);
+// router.use(verifyToken);
 
 //add a community
 router.post("/", addCommunity);
