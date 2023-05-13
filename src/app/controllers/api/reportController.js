@@ -19,7 +19,6 @@ const {
   AppError,
   deleteFile,
   getGridFsStream,
-  extractData,
 } = require("../../utils/helpers");
 const {
   userNotFound,
@@ -30,6 +29,7 @@ const {
 } = require("../../utils/constants/RESPONSEMESSAGES");
 const template = require("../../utils/helpers/generateTemplate");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
+const { uploadToMongo, extractReportsData } = require("../../utils/helpers/extractData");
 
 // create report
 exports.createReport = catchAsync(async (req, res, next) => {
@@ -40,17 +40,33 @@ exports.createReport = catchAsync(async (req, res, next) => {
 
   const { familyMemberId, ...data } = req.body;
 
+
+  const patient = await Patient.findById(req.user._id);
+
+  name = patient.name;
+  email = patient.email;
+
+
+  
+  if (isFamilyReport) {
+    const family = await Family.findById(familyMemberId);
+    name = family.name;
+  }
+
   if (data.file.split(".")[1] === "pdf") {
     if (
-      data.lab === LABS_NAME.SHAUKAT_LAB ||
       (data.lab === LABS_NAME.CHUGHTAI_LAB && data.type === LABS_TYPE.BLOOD) ||
       data.type === LABS_TYPE.LIVER
     ) {
-      data.file = await extractData({
+      const extractedData = await extractReportsData({
+        name,
+        email,
         lab_name: data.lab,
         lab_type: data.type,
         file: data.file,
       });
+
+      data.file = uploadToMongo(extractedData.html, extractedData.filename);
     }
   }
 
