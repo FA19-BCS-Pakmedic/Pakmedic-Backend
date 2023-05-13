@@ -152,6 +152,19 @@ const patientSchema = mongoose.Schema({
       },
     },
   ],
+
+
+  status: {
+    type: String,
+    enum: ["active", "blocked", "warned", "inactive"],
+    default: "active",
+  },
+
+  joined: {
+    type: Date,
+    default: Date.now(),
+    
+  }
 });
 
 // pre populate scans

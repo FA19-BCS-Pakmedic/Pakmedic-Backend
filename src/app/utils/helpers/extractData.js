@@ -3,10 +3,10 @@ const axios = require("axios");
 const puppeteer = require("puppeteer");
 const stream = require("stream");
 
-const template = require("../../utils/helpers/generateTemplate");
+const {reportTemplate, prescriptionTemplate} = require("../../utils/helpers/generateTemplate");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 
-module.exports = async (data) => {
+exports.extractReportsData = async (data) => {
   const { lab_name, lab_type, file } = data;
 
   console.log(data);
@@ -19,7 +19,7 @@ module.exports = async (data) => {
 
   const filename = `${uuid().split("-")[0]}-${file}`;
 
-  const html = template({
+  const html = reportTemplate({
     name: "Abdul Moeed",
     email: "test@gmail.com",
     date: new Date(),
@@ -27,41 +27,77 @@ module.exports = async (data) => {
     reports: response.data,
   });
 
-  const browser = await puppeteer.launch({
-    headless: false,
-    args: ["--explicitly-allowed-ports=" + 8000],
-  });
-  const page = await browser.newPage();
+  return {html, filename};
 
-  await page.setContent(html);
-
-  const pdf = await page.pdf({
-    format: "A4",
-    printBackground: true,
-  });
-
-  await browser.close();
-
-  const bucket = await gridfsFileStream();
-
-  const metadata = {
-    author: "John Doe",
-    date: new Date(),
-    description: "Example file for demonstration purposes",
-  };
-
-  const uploadStream = bucket.openUploadStream(filename, {
-    metadata,
-    contentType: "application/pdf",
-  });
-
-  const fileStream = stream.Readable.from(pdf);
-
-  fileStream.pipe(uploadStream);
-
-  uploadStream.on("finish", (_id, filename, metadata) => {
-    console.log(`File ${filename} has been uploaded to MongoDB`);
-  });
-
-  return filename;
 };
+
+
+exports.extractPrescriptionData = async (data) => {
+
+  const {file, ...reqData} = data;
+
+  const filename = `${uuid().split("-")[0]}-${file}`;
+
+  const html = prescriptionTemplate(reqData);
+
+
+    return {html, filename};
+
+
+}
+
+
+
+exports.uploadToMongo = async (html, filename) => {
+
+  console.log(filename);
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: false,
+      args: ["--explicitly-allowed-ports=" + 8000],
+    });
+    const page = await browser.newPage();
+  
+    await page.setContent(html);
+  
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+  
+    await browser.close();
+  
+    const bucket = await gridfsFileStream();
+  
+    const metadata = {
+      author: "John Doe",
+      date: new Date(),
+      description: "Example file for demonstration purposes",
+    };
+  
+    const uploadStream = bucket.openUploadStream(filename, {
+      metadata,
+      contentType: "application/pdf",
+    });
+  
+    const fileStream = stream.Readable.from(pdf);
+  
+    fileStream.pipe(uploadStream);
+  
+    uploadStream.on("finish", (_id) => {
+      console.log(`File ${filename} has been uploaded to MongoDB`);
+    });
+  
+    return filename;
+
+
+
+  }catch(err) {
+    console.log(err);
+    return null
+  }
+
+
+
+}

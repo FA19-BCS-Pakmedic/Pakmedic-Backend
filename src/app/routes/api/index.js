@@ -19,5 +19,9 @@ routers.ml = require("./MLroutes");
 routers.notification = require("./notificationRoutes");
 routers.stripe = require("./stripeRoutes");
 routers.appointmentRequest = require("./appointmentRequestRoutes");
+routers.admin = require("./adminRoutes");
+routers.review = require("./reviewRoutes");
+routers.complaint = require('./complaintRoutes');
+routers.prescription = require('./prescriptionRoutes');
 
 module.exports = routers;

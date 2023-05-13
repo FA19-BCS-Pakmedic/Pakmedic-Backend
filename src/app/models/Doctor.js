@@ -80,9 +80,12 @@ const doctorSchema = mongoose.Schema({
   communities: {
     type: [String],
   },
-  reviews: {
-    type: [String],
-  },
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review"
+    },
+  ],
 
   //account verification
   isVerified: {
@@ -109,6 +112,18 @@ const doctorSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+
+  status: {
+    type: String,
+    enum: ["active", "blocked", "warned", "inactive"],
+    default: "active",
+  },
+
+  joined: {
+    type: Date,
+    default: Date.now(),
+  }
+
 });
 
 // pre function to prepopulate before find query

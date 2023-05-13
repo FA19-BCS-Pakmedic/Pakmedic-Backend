@@ -18,5 +18,10 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
   });
 });
 
+
+
+
 // get all appointments for a specfic doctor or patient
 exports.getAllAppointments = factory.getAll(Appointment);
+
+
