@@ -12,20 +12,30 @@ const reportSchema = mongoose.Schema({
   },
   date: {
     type: Date,
+    default: new Date(),
   },
   symptoms: {
-    type: [String],
+    type: String,
+  },
+  type: {
+    type: String,
+    required: [true, `${requiredError} type`],
   },
   lab: {
     type: String,
+    required: [true, `${requiredError} lab`],
   },
-  image: {
+  file: {
     type: String,
-    required: [true, `${requiredError} image`],
+    required: [true, `${requiredError} file`],
   },
   isFamilyReport: {
     type: Boolean,
     default: false,
+  },
+  familyMemberId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Family",
   },
 });
 

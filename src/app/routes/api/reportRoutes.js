@@ -10,6 +10,7 @@ const {
   getReportsOfAllFamilyMembers,
   updateReport,
   deleteReport,
+  test,
 } = require("../../controllers/api/reportController");
 
 // import middlewares
@@ -17,6 +18,7 @@ const {
   verifyToken,
   authorizeRole,
   singleFileUpload,
+  uploadSingle,
 } = require("../../middlewares");
 
 // import utils
@@ -25,12 +27,14 @@ const ROLES = require("../../utils/constants/ROLES");
 // configure router
 const router = express.Router();
 
+// router.get("/test", test);
+
 // authorization
 router.use(verifyToken);
 router.use(authorizeRole(ROLES[0])); // for now it is only accessible to the patient themselves, after implementation of the patient's grant permission to access ehr to the doctor functionality this will be replaced
 
 // create a report
-router.post("/", [singleFileUpload("report", "images", "image")], createReport); //single file upload should be replaced with multiple files upload issue#42
+router.post("/", createReport); //single file upload should be replaced with multiple files upload issue#42
 
 // search reports by patient id
 router.get("/patients", getReportsByPatientId);

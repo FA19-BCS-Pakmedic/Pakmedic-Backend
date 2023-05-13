@@ -24,3 +24,18 @@ exports.getFile = catchAsync(async (req, res, next) => {
     throw err;
   }
 });
+
+exports.addFile = catchAsync(async (req, res, next) => {
+  const filename = req.file.filename;
+
+  if (!filename) {
+    return next(new AppError("No file uploaded", 400));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      filename,
+    },
+  });
+});

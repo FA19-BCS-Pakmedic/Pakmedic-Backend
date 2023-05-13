@@ -25,18 +25,41 @@ const PostSchema = new mongoose.Schema({
     enum: Object.values(ROLES),
     required: [true, `${requiredError} authorType`],
   },
-
-  // comments: [
-  //   {
-  //     type: [mongoose.Schema.Types.ObjectId],
-  //     ref: "Comment",
-  //   },
-  // ],
+  file: {
+    type: String,
+  },
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
   community: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, `${requiredError} community`],
     ref: "Community",
   },
+  isAnonymous: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+// pre query to populate the author, and community
+PostSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "author",
+    select: "-__v",
+  })
+    .populate({
+      path: "community",
+      select: "name",
+    })
+    .populate({
+      path: "comments",
+      select: "-__v",
+    });
+  next();
 });
 
 module.exports = mongoose.model("Post", PostSchema);

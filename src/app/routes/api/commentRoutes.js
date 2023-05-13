@@ -23,16 +23,16 @@ router.use(verifyToken);
 /*****************************ROUTES********************************/
 
 // add a comment
-router.post("/:pid", addComment);
+router.post("/:pid/:cid", addComment);
 
 // get all comments
 router.get("/", getAllComments);
 
 //get all comments for a specific post
-router.get("/posts/:pid", getAllCommentsForPost);
+// router.get("/posts/:pid", getAllCommentsForPost);
 
 //delete a comment by id
-router.delete("/:cid", deleteComment);
+router.delete("/:id", deleteComment);
 
 // export router
 module.exports = router;

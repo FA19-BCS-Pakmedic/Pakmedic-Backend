@@ -7,6 +7,13 @@ node_modules
 
 nodemon.json
 
+
 __pycache__
 
+brainMRI_Model.hdf5
+
+*.png
 src/ml/ML_models/brainMRI_model.hdf5
+
+
+src/BERT/models/*

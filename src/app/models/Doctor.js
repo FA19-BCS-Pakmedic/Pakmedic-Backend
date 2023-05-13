@@ -52,6 +52,7 @@ const doctorSchema = mongoose.Schema({
   avatar: {
     type: String,
     // required: [true, `${requiredError} avatar`],
+    default: "default.png",
   },
 
   //pmc data
@@ -79,9 +80,12 @@ const doctorSchema = mongoose.Schema({
   communities: {
     type: [String],
   },
-  reviews: {
-    type: [String],
-  },
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review"
+    },
+  ],
 
   //account verification
   isVerified: {
@@ -108,6 +112,18 @@ const doctorSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+
+  status: {
+    type: String,
+    enum: ["active", "blocked", "warned", "inactive"],
+    default: "active",
+  },
+
+  joined: {
+    type: Date,
+    default: Date.now(),
+  }
+
 });
 
 // pre function to prepopulate before find query
@@ -115,10 +131,15 @@ doctorSchema.pre(/^find/, function (next) {
   this.populate({
     path: "experiences",
     select: "-__v",
-  }).populate({
-    path: "services",
-    select: "-__v",
-  });
+  })
+    .populate({
+      path: "services",
+      select: "-__v",
+    })
+    .populate({
+      path: "communities",
+      select: "-__v",
+    });
   next();
 });
 

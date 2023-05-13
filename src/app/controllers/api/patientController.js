@@ -13,6 +13,7 @@ const {
   createSendToken,
   sendMail,
   getConfCodeEmailTemplate,
+  stripe,
 } = require("../../utils/helpers");
 
 // importing response messages
@@ -39,6 +40,8 @@ const {
 
 //importing models
 const db = require("../../models");
+const { init, getClient } = require("../../utils/helpers/voximplant");
+const { stripeClient } = require("../../utils/helpers/stripe");
 const Patient = db.patient;
 
 // method to sign up patient
@@ -77,7 +80,28 @@ exports.register = catchAsync(async (req, res, next) => {
     );
   }
 
+  const customer = await stripeClient.customers.create({
+    name: patient.name,
+    email: patient.email,
+  });
+
+  patient.stripeCustomerId = customer.id;
+
   const user = await patient.save();
+
+  const data = {
+    userName: `${user._id.toString()}`,
+    userDisplayName: user.name,
+    userPassword: user._id.toString(),
+    userActive: true,
+    applicationId: "10470602", //TODO: Replace this with variable from .env
+  };
+
+  await init();
+  const client = getClient();
+
+  console.log(client);
+  await client.Users.addUser(data);
 
   //  3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
@@ -347,7 +371,7 @@ const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
 
 //update the patient data
 exports.updatePatient = catchAsync(async (req, res, next) => {
-  id = req.decoded.id;
+  id = req.user._id;
   data = req.body;
   // console.log(req.cookie);
   // console.log(id, data);
@@ -364,20 +388,28 @@ exports.updatePatient = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: updatedPatient,
+    data: { user: updatedPatient },
   });
 });
 
 // get the specific patient data
 exports.getPatientById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
-  const patient = await Patient.findById(id).select("+password");
+
+  console.log(id);
+
+  const patient = await Patient.findById(id);
   if (!patient) {
     return next(new AppError(`patient ${userNotFoundID}`, 404));
   }
+
+  console.log("PATIENT BY ID", patient);
+
   res.status(200).json({
     success: true,
-    data: patient,
+    data: {
+      user: patient,
+    },
   });
 });
 
@@ -451,6 +483,24 @@ exports.removeProfileImage = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: `Patient ${profileImageRemoved}`,
+    data: {
+      patient,
+    },
+  });
+});
+
+exports.addAvatar = catchAsync(async (req, res, next) => {
+  const id = req.user._id;
+
+  const patient = await Patient.findById(id);
+
+  patient.avatar = req.file.filename;
+
+  await patient.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Patient ${profileImageUpdated}`,
     data: {
       patient,
     },

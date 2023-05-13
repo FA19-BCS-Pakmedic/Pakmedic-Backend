@@ -19,18 +19,34 @@ const CommentSchema = new mongoose.Schema({
   },
   post: {
     type: mongoose.Schema.Types.ObjectId,
-    required: [true, `${requiredError} post`],
     ref: "Post",
   },
   authorType: {
     type: String,
     enum: Object.values(ROLES),
-    required: [true, `${requiredError} authorType`],
   },
-  // user_type: {
-  //   type: String,
-  //   enum: Object.values(ROLES),
-  // },
+  isReply: {
+    type: Boolean,
+    default: false,
+  },
+  replies: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
+});
+
+// pre find query population for author and replies
+CommentSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "author",
+    select: "-__v",
+  }).populate({
+    path: "replies",
+    select: "-__v",
+  });
+  next();
 });
 
 module.exports = mongoose.model("Comment", CommentSchema);

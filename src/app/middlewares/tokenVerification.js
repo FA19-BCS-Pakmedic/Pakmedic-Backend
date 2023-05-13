@@ -20,14 +20,12 @@ const models = require("../models");
 module.exports = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
 
-  console.log(req.headers);
   let token;
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
-    console.log(token, "as bearer token");
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
@@ -38,7 +36,6 @@ module.exports = catchAsync(async (req, res, next) => {
   // 2) Verification token
   const decoded = await promisify(jwt.verify)(token, jwtConf.accessSecret);
 
-  console.log("decoded", decoded);
   // req.decoded = decoded;
 
   // getting the correct model based on the current user role
@@ -51,7 +48,6 @@ module.exports = catchAsync(async (req, res, next) => {
 
   // 3) Check if user still exists
   const currentUser = await Model.findById(decoded?.id);
-  console.log("Current user", currentUser);
   // const currentUser = await models.doctor.findById(decoded?.id);
 
   if (!currentUser) {

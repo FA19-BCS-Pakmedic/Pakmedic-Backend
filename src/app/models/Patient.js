@@ -55,8 +55,15 @@ const patientSchema = mongoose.Schema({
     // required: [true, `${requiredError} address`],
     // required: [true, `${requiredError} address`],
   },
+
+  location: {
+    type: String,
+    required: [true, `${requiredError} location`],
+  },
+
   avatar: {
     type: String,
+    default: "default.png",
   },
 
   //   biological data e.g. weight, height, bloodtype
@@ -128,6 +135,53 @@ const patientSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+
+  //stripe customer id
+  stripeCustomerId: {
+    type: String,
+  },
+
+  ehrAccess: [
+    {
+      doctor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Doctor",
+      },
+      accessEndDate: {
+        type: Date,
+      },
+    },
+  ],
+
+
+  status: {
+    type: String,
+    enum: ["active", "blocked", "warned", "inactive"],
+    default: "active",
+  },
+
+  joined: {
+    type: Date,
+    default: Date.now(),
+    
+  }
+});
+
+// pre populate scans
+patientSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "scans",
+    select: "-__v",
+  })
+    .populate({
+      path: "reports",
+      select: "-__v",
+    })
+    .populate({
+      path: "familyMembers",
+      select: "-__v",
+    });
+  next();
 });
 
 module.exports = mongoose.model(`Patient`, patientSchema);

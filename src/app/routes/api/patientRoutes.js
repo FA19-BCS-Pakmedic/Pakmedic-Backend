@@ -21,6 +21,7 @@ const {
   updateProfileImage,
   verifyOTP,
   getPatientById,
+  addAvatar,
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -31,6 +32,7 @@ const {
   patientRegistrationValidator,
   fetchAddress,
   singleFileUpload,
+  uploadSingle,
 } = require("../../middlewares");
 
 // import utils
@@ -96,19 +98,20 @@ router.patch("/reset-password", [
   resetPassword,
 ]);
 
-router.use(authorizeRole(ROLES[0]));
+// router.use(authorizeRole(ROLES[0])); //TODO: PLACE THIS IN AN APPROPRIATE PLACE
 
 // patient routes to get, update users
 router.route("/:id").get(getPatientById);
 
 router
   .route("/avatar")
+  .post([uploadSingle()], addAvatar)
   .patch([singleFileUpload("avatar", "images", "avatar")], updateProfileImage)
   .delete(removeProfileImage);
 
 router
   .route("/")
   .get(getPatient)
-  .patch([patientRegistrationValidator, fetchAddress], updatePatient)
+  .patch(updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
 module.exports = router;

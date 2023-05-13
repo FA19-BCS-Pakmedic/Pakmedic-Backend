@@ -39,13 +39,30 @@ const {
   post,
   community,
   file,
+  appointment,
   ml,
+  notification,
+  stripe,
+  appointmentRequest,
+  admin: Admin,
+  review,
+  complaint,
+  prescription
 } = require("./app/routes/api");
 
 // Start express app
 const app = express();
 
 app.enable("trust proxy");
+
+//Firebase Setup
+var admin = require("firebase-admin");
+
+var serviceAccount = require("../pakmedic-notifications-firebase-adminsdk-51eg2-b5d69d6e0e.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -66,7 +83,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Limit requests from same API
 const limiter = rateLimit({
-  max: 100,
+  max: 5000,
   windowMs: 60 * 60 * 1000,
   message: tooManyRequests,
 });
@@ -116,7 +133,15 @@ app.use("/api/v1/communities", community);
 app.use("/api/v1/posts", post);
 app.use("/api/v1/comments", comment);
 app.use("/api/v1/files", file);
+app.use("/api/v1/appointments", appointment);
 app.use("/api/v1/ML", ml);
+app.use("/api/v1/notifications", notification);
+app.use("/api/v1/stripe", stripe);
+app.use("/api/v1/appointments/requests", appointmentRequest);
+app.use("/api/v1/admin", Admin);
+app.use("/api/v1/reviews", review);
+app.use("/api/v1/complaints", complaint);
+app.use("/api/v1/prescriptions", prescription);
 
 // any irrelavant end point will hit this and throw error
 app.all("*", (req, res, next) => {
@@ -126,5 +151,3 @@ app.all("*", (req, res, next) => {
 app.use(globalErrorHandler);
 
 module.exports = app;
-
-// console.log("Imports work");

@@ -18,4 +18,11 @@ db.report = require("./Report");
 db.community = require("./Community");
 db.comment = require("./Comment");
 db.post = require("./Post");
+db.message = require("./Message");
+db.appointment = require("./Appointment");
+db.appointmentReq = require("./AppointmentRequest");
+db.review = require("./Review");
+db.complaint = require('./Complaint');
+db.prescription = require('./Prescription');
+
 module.exports = db;
