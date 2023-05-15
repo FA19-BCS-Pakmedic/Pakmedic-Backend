@@ -16,13 +16,16 @@ const MedicineSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    dosage_size: {
+        type: String | Number,
+    },
     days: {
         type: Number,
         required: true
     },
     additional_days: {
         type: Number,
-        required: true
+        default: 0,
     },
     precautionary_details: {
         type: String,
