@@ -3,38 +3,30 @@ const ROLES = require('../utils/constants/ROLES');
 
 
 const complaintSchema = mongoose.Schema({
-
-
-
-
-    userType: {
+    complaineeType: {
         type: String,
         enum: Object.values(ROLES),
-      },
-    
-      complainee: {
+    },
+    complainantType: {
+        type: String,
+        enum: Object.values(ROLES),
+    },
+    complainee: {
         type: mongoose.Schema.Types.ObjectId,
-        refPath: "userType",
+        refPath: "complaineeType",
         required: true,
     }, 
     complainant: {
         type: mongoose.Schema.Types.ObjectId,
-        refPath: "userType",
+        refPath: "complainantType",
         required: true,
     },
-
     status: {
         type: String,
         enum: ['On Hold', 'Resolved', 'Pending'],
         default: 'Pending',
     }, 
-
-    role: {
-        type: String,
-        enum: Object.values(ROLES),
-    },
-
-    title: {
+    subject: {
         type: String,
         required: true,
     },
@@ -44,7 +36,7 @@ const complaintSchema = mongoose.Schema({
         enum: ['Comment', 'Post', 'General'],
         default: 'General',
     },
-    description: {
+    complaint: {
         type: String,
         required: true,
 
@@ -57,8 +49,25 @@ const complaintSchema = mongoose.Schema({
         type: String,
         required: true,
         default:  Math.floor(100000 + Math.random() * 900000),
+    },
+    review: {
+        type: String,
     }
 });
+
+
+// prefill complainee and complainant feilds before finding
+complaintSchema.pre(/^find/, function(next) {
+    this.populate({
+        path: 'complainee',
+        select: '-__v',
+    }).populate({
+        path: 'complainant',
+        select: '-__v',
+    });
+    next();
+});
+
 
 
 module.exports = mongoose.model('Complaint', complaintSchema);
