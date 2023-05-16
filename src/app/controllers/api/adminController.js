@@ -10,6 +10,11 @@ const mongoose = require("mongoose");
 const APIFeatures = require("../../utils/helpers/apiFeatures");
 const ROLES = require("../../utils/constants/ROLES");
 
+const factory = require("./handlerFactory");
+
+
+exports.getAllDoctors = factory.getAll(Doctor);
+
 exports.getDashboardStats = catchAsync(async(req, res, next) => {
 
     // appointments by month
@@ -98,6 +103,7 @@ exports.getDashboardStats = catchAsync(async(req, res, next) => {
   }
   
 
+  
 
 
 //   total doctors, patients, booked appointments, complaints
@@ -115,11 +121,10 @@ const specialtyQueryResult = await Doctor.aggregate([
   ]);
 
   const specialties = [];
-  const specialtiesCount = [];
+  // const specialtiesCount = [];
 
   specialtyQueryResult.forEach((specialtyCount) => {
-    specialties.push(specialtyCount._id);
-    specialtiesCount.push(specialtyCount.count);
+    specialties.push({label: specialtyCount._id, value: specialtyCount.count});
   });
 
 
@@ -165,7 +170,6 @@ diseaseQueryResult.forEach((diseaseCount) => {
       totalAppointments,
       totalComplaints,
       specialties,
-        specialtiesCount,
          diseases,
         diseasesCount,
         topDoctors: doctorQueryResult,

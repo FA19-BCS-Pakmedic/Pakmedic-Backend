@@ -3,7 +3,7 @@ const express = require("express");
 
 const 
 {
-    getDashboardStats, getAllUsers, getDoctorData, updateUser
+    getDashboardStats, getAllUsers, getDoctorData, updateUser, getAllDoctors
 } = require("../../controllers/api/adminController");
 
 
@@ -14,7 +14,9 @@ router.get('/dashboard-stats', getDashboardStats);
 
 router.get('/users', getAllUsers);
 
-router.get('/doctor-data/:id', getDoctorData);
+router.get('/doctors/:id', getDoctorData);
+
+router.get('/doctors', getAllDoctors);
 
 router.patch('/users/:id', updateUser)
 
