@@ -8,6 +8,7 @@ const Review = require('../../models').review;
 const mongoose = require("mongoose");
 
 const APIFeatures = require("../../utils/helpers/apiFeatures");
+const ROLES = require("../../utils/constants/ROLES");
 
 exports.getDashboardStats = catchAsync(async(req, res, next) => {
 
@@ -288,3 +289,36 @@ diseaseQueryResult.forEach((diseaseCount) => {
 
     return doc;
   }
+
+
+  exports.updateUser = catchAsync(async(req, res, next) => {
+
+    const {id} = req.params;
+
+    let user;
+
+    if(req.body.role === ROLES[0]) {
+      user = await Patient.findByIdAndUpdate(
+        id,
+        { $set: { ...req.body } },
+        {
+          new: true,
+        }
+      );
+    } else if(req.body.role === ROLES[1]) {
+      user = await Doctor.findByIdAndUpdate(
+        id,
+        { $set: { ...req.body } },
+        {
+          new: true,
+        }
+      );
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user,
+      },
+    });
+  });
