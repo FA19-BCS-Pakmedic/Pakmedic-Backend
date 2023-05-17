@@ -16,4 +16,6 @@ helpers.getGridFsStream = require("./gridfsFileStream");
 helpers.generateTemplate = require("./generateTemplate");
 helpers.extractData = require("./extractData");
 helpers.stripe = require("./stripe");
+
+
 module.exports = helpers;

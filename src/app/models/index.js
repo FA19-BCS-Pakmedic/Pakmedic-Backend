@@ -24,5 +24,9 @@ db.appointmentReq = require("./AppointmentRequest");
 db.review = require("./Review");
 db.complaint = require('./Complaint');
 db.prescription = require('./Prescription');
+db.admin = require('./Admin');
+
+
+
 
 module.exports = db;

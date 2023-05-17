@@ -1,9 +1,10 @@
-const { AppError, catchAsync } = require("../../utils/helpers");
+const { AppError, catchAsync, matchEncryptions, createSendToken } = require("../../utils/helpers");
 const Appointment = require("../../models").appointment;
 const Doctor = require("../../models").doctor;
 const Patient = require("../../models").patient;
 const Complaint = require("../../models").complaint;
 const Review = require('../../models').review;
+const Admin = require('../../models').admin;
 // const AppointmentRequests = require("../../models").appointmentReq;
 const mongoose = require("mongoose");
 
@@ -326,3 +327,56 @@ diseaseQueryResult.forEach((diseaseCount) => {
       },
     });
   });
+
+exports.register = catchAsync(async(req, res, next) => {
+
+  const {name, email, password} = req.body;
+
+  const admin = new Admin({
+    name,
+    email,
+    password,
+    role: 'Admin',
+  });
+
+
+  await admin.save();
+
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      admin,
+    },
+  })
+
+});
+
+
+exports.login = catchAsync(async(req, res, next) => {
+
+  const {email, password} = req.body;
+
+  const admin = await Admin.findOne({email}).select('+password');
+
+  if(!admin || !(await matchEncryptions(password, admin.password))) {
+    return next(new AppError('Incorrect email or password', 401));
+  }
+
+  createSendToken(admin, 200, req, res);
+});
+
+
+exports.getLoggedInAdmin = catchAsync(async(req, res, next) => {
+
+  const user = req.user;
+
+  return res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  })
+
+})
+
