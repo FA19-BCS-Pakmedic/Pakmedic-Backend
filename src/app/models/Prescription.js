@@ -15,8 +15,7 @@ const MedicineSchema = mongoose.Schema({
     required: true,
   },
   dosage_size: {
-    type: String,
-    required: true,
+    type: String | Number,
   },
   days: {
     type: Number,
@@ -24,6 +23,7 @@ const MedicineSchema = mongoose.Schema({
   },
   additional_days: {
     type: Number,
+    default: 0,
   },
   precautionary_details: {
     type: String,
