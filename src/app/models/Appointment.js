@@ -42,6 +42,15 @@ const appointmentSchema = mongoose.Schema({
     // TODO: Add an enum
     default: "",
   },
+  stripe_payment_intent_id: {
+    type: String,
+  },
+
+  // creation date
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
 });
 
 // add a pre find query to populate doctor, patient and service

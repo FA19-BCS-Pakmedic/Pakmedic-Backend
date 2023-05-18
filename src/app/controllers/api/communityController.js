@@ -41,6 +41,8 @@ exports.getCommunityById = factory.getOne(CommunityModel);
 
 exports.updateCommunity = factory.updateOne(CommunityModel);
 
+exports.deleteCommunity = factory.deleteOne(CommunityModel);
+
 exports.joinCommunity = catchAsync(async (req, res, next) => {
   const communityId = req.params.id;
 

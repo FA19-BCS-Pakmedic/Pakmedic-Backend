@@ -13,6 +13,7 @@ const {
   createSendToken,
   sendMail,
   getConfCodeEmailTemplate,
+  stripe,
 } = require("../../utils/helpers");
 
 // importing response messages
@@ -40,6 +41,7 @@ const {
 //importing models
 const db = require("../../models");
 const { init, getClient } = require("../../utils/helpers/voximplant");
+const { stripeClient } = require("../../utils/helpers/stripe");
 const Patient = db.patient;
 
 // method to sign up patient
@@ -77,6 +79,13 @@ exports.register = catchAsync(async (req, res, next) => {
       "Verify your account"
     );
   }
+
+  const customer = await stripeClient.customers.create({
+    name: patient.name,
+    email: patient.email,
+  });
+
+  patient.stripeCustomerId = customer.id;
 
   const user = await patient.save();
 

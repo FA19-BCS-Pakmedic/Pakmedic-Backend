@@ -7,6 +7,7 @@ const {
   getCommunityById,
   joinCommunity,
   leaveCommunity,
+  deleteCommunity
 } = require("../../controllers/api/communityController");
 
 //import controller functions
@@ -21,7 +22,7 @@ const router = express.Router();
 
 /***********************ROUTES*********************/
 
-router.use(verifyToken);
+// router.use(verifyToken);
 
 //add a community
 router.post("/", addCommunity);
@@ -43,7 +44,7 @@ router.patch("/leave/:id", leaveCommunity);
 
 //delete a community
 
-// router.delete("/:cid", deleteCommunity);
+router.delete("/:id", deleteCommunity);
 
 // // security layer
 // router.use(verifyToken);

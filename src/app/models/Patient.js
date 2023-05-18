@@ -135,6 +135,36 @@ const patientSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
+
+  //stripe customer id
+  stripeCustomerId: {
+    type: String,
+  },
+
+  ehrAccess: [
+    {
+      doctor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Doctor",
+      },
+      accessEndDate: {
+        type: Date,
+      },
+    },
+  ],
+
+
+  status: {
+    type: String,
+    enum: ["active", "blocked", "warned", "inactive"],
+    default: "active",
+  },
+
+  joined: {
+    type: Date,
+    default: Date.now(),
+    
+  }
 });
 
 // pre populate scans
