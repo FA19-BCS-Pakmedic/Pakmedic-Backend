@@ -1,4 +1,4 @@
-const { AppError, catchAsync } = require("../../utils/helpers");
+const { AppError, catchAsync, sendNotification } = require("../../utils/helpers");
 const Appointment = require("../../models").appointment;
 const Notification = require('../../models').notification;
 const fetch = require("node-fetch");
@@ -16,28 +16,17 @@ exports.createAppointment = catchAsync(async (req, res, next) => {
 
 
   if(userNotification) {
-
-    const notificationObj = {
-      title: "New appoinment has been booked",
-      body: `Appointment on date ${appointment.date.toLocaleString().split(",")[0]} and time ${appointment.time} has been booked`,
-      user: appointment.doctor._id,
-      navigate: "AppointmentDetails",
-      data: appointment._id,
-      image: null,
-      tokenID: userNotification.tokenID,
-    }
-    
-    await fetch(`http://localhost:8000/api/v1/notifications/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(notificationObj),
-    });
-
+    await sendNotification(
+      "New appoinment has been booked",
+      `Appointment on date ${appointment.date.toLocaleString().split(",")[0]} and time ${appointment.time} has been booked`,
+      appointment.doctor._id,
+      "AppointmentDetails",
+      appointment._id,
+      null,
+      userNotification.tokenID,
+    )
   }
   
-
   res.status(201).json({
     status: "success",
     data: {
