@@ -58,4 +58,16 @@ const PrescriptionSchema = mongoose.Schema({
   },
 });
 
+// pre find populate
+PrescriptionSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "patient",
+    select: "-__v",
+  }).populate({
+    path: "doctor",
+    select: "-__v",
+  });
+  next();
+});
+
 module.exports = mongoose.model("Prescription", PrescriptionSchema);
