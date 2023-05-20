@@ -10,7 +10,7 @@ C:\Users\haris\anaconda3\envs\bert\python.exe test.py --config app/config/config
 //Make sure to replace API url with your ipconfig url localhost
 
 docker pull pakmedic/bert_microservice:latest
-docker run -p 5001:5001 -e API_URL=http://192.168.0.101:8000 pakmedic/bert_microservice
+docker run -p 5001:5001 -e API_URL=http://192.168.100.14:8000 pakmedic/bert_microservice
 
 
 //Make changes in code and repush images? 
