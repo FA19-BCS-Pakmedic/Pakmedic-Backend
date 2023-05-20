@@ -1,13 +1,20 @@
-const { AppError, catchAsync } = require("../../utils/helpers");
+const { AppError, catchAsync, matchEncryptions, createSendToken } = require("../../utils/helpers");
 const Appointment = require("../../models").appointment;
 const Doctor = require("../../models").doctor;
 const Patient = require("../../models").patient;
 const Complaint = require("../../models").complaint;
 const Review = require('../../models').review;
+const Admin = require('../../models').admin;
 // const AppointmentRequests = require("../../models").appointmentReq;
 const mongoose = require("mongoose");
 
 const APIFeatures = require("../../utils/helpers/apiFeatures");
+const ROLES = require("../../utils/constants/ROLES");
+
+const factory = require("./handlerFactory");
+
+
+exports.getAllDoctors = factory.getAll(Doctor);
 
 exports.getDashboardStats = catchAsync(async(req, res, next) => {
 
@@ -97,6 +104,7 @@ exports.getDashboardStats = catchAsync(async(req, res, next) => {
   }
   
 
+  
 
 
 //   total doctors, patients, booked appointments, complaints
@@ -114,11 +122,10 @@ const specialtyQueryResult = await Doctor.aggregate([
   ]);
 
   const specialties = [];
-  const specialtiesCount = [];
+  // const specialtiesCount = [];
 
   specialtyQueryResult.forEach((specialtyCount) => {
-    specialties.push(specialtyCount._id);
-    specialtiesCount.push(specialtyCount.count);
+    specialties.push({label: specialtyCount._id, value: specialtyCount.count});
   });
 
 
@@ -164,7 +171,6 @@ diseaseQueryResult.forEach((diseaseCount) => {
       totalAppointments,
       totalComplaints,
       specialties,
-        specialtiesCount,
          diseases,
         diseasesCount,
         topDoctors: doctorQueryResult,
@@ -288,3 +294,89 @@ diseaseQueryResult.forEach((diseaseCount) => {
 
     return doc;
   }
+
+
+  exports.updateUser = catchAsync(async(req, res, next) => {
+
+    const {id} = req.params;
+
+    let user;
+
+    if(req.body.role === ROLES[0]) {
+      user = await Patient.findByIdAndUpdate(
+        id,
+        { $set: { ...req.body } },
+        {
+          new: true,
+        }
+      );
+    } else if(req.body.role === ROLES[1]) {
+      user = await Doctor.findByIdAndUpdate(
+        id,
+        { $set: { ...req.body } },
+        {
+          new: true,
+        }
+      );
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user,
+      },
+    });
+  });
+
+exports.register = catchAsync(async(req, res, next) => {
+
+  const {name, email, password} = req.body;
+
+  const admin = new Admin({
+    name,
+    email,
+    password,
+    role: 'Admin',
+  });
+
+
+  await admin.save();
+
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      admin,
+    },
+  })
+
+});
+
+
+exports.login = catchAsync(async(req, res, next) => {
+
+  const {email, password} = req.body;
+
+  const admin = await Admin.findOne({email}).select('+password');
+
+  if(!admin || !(await matchEncryptions(password, admin.password))) {
+    return next(new AppError('Incorrect email or password', 401));
+  }
+
+  createSendToken(admin, 200, req, res);
+});
+
+
+exports.getLoggedInAdmin = catchAsync(async(req, res, next) => {
+
+  const user = req.user;
+
+  return res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  })
+
+})
+
