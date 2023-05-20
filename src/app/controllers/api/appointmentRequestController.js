@@ -1,9 +1,11 @@
-const { AppError, catchAsync } = require("../../utils/helpers");
+const { AppError, catchAsync, sendNotification } = require("../../utils/helpers");
 
 const {} = require("../../utils/constants/RESPONSEMESSAGES");
 
 const AppointmentReq = require("../../models").appointmentReq;
 const Appointment = require("../../models").appointment;
+const Notification = require("../../models").notification;
+
 
 const factory = require("./handlerFactory");
 
@@ -22,9 +24,11 @@ exports.updateAppointmentReq = catchAsync(async (req, res, next) => {
 
   if (!updatedAppointmentReq) {
     return next(new AppError("No Appointment Request Found", 404));
-  }
+  } 
 
   const { appointment, time, date } = updatedAppointmentReq;
+
+  console.log(appointment);
 
   if (updatedAppointmentReq.isApproved) {
     let updatedAppointment;
@@ -43,8 +47,51 @@ exports.updateAppointmentReq = catchAsync(async (req, res, next) => {
       );
     }
 
+
+
     if (!updatedAppointment) {
       return next(new AppError("No Appointment Found", 404));
+    }
+
+    const appointmentRequest = await AppointmentReq.findById(id);
+
+    if (!appointmentRequest) {
+      return next(new AppError("No Appointment Request Found", 404));
+    }
+
+    
+    const requestedBy = appointmentRequest.requestedBy;
+    const user = appointmentRequest.userType === "Doctor" ? appointmentRequest.appointment.patient : appointmentRequest.appointment.doctor;
+    
+    let noti1 = Notification.findOne({user: requestedBy._id}).exec();
+    let noti2 = Notification.findOne({user: user}).exec();
+    
+
+    const [data1, data2] = await Promise.all([noti1, noti2]);
+
+    console.log(data1.tokenID, data2.tokenID);
+
+    if( data1 ) {
+      await sendNotification(
+        `Your appointment request has been accepted`,
+        `New Appointment date ${updatedAppointment.date.toLocaleString().split(",")[0]} and time ${updatedAppointment.time}`,
+        requestedBy,
+        "AppointmentDetails",
+        updatedAppointment._id,
+        null,
+        data1.tokenID,
+      )
+    }
+    if( data2 ) {
+      await sendNotification(
+        `Your appointment with ${requestedBy.name} has been ${appointmentRequest.requestType}`,
+        `New Appointment date ${updatedAppointment.date.toLocaleString().split(",")[0]} and time ${updatedAppointment.time}`,
+        user,
+        "AppointmentDetails",
+        updatedAppointment._id,
+        null,
+        data2.tokenID,
+      )
     }
   }
 
