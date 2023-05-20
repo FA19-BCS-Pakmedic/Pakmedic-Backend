@@ -76,6 +76,9 @@ exports.sendNotification = catchAsync(async (req, res, next) => {
         smallIcon: "logo_circle",
         channelId: "default",
         importance: 4,
+        pressAction: {
+          id: "default",
+        },
         actions: [
           {
             title: "Mark as Read",
