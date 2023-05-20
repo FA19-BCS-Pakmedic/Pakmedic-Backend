@@ -69,8 +69,6 @@ exports.updateAppointmentReq = catchAsync(async (req, res, next) => {
 
     const [data1, data2] = await Promise.all([noti1, noti2]);
 
-    console.log(data1.tokenID, data2.tokenID);
-
     if( data1 ) {
       await sendNotification(
         `Your appointment request has been accepted`,
