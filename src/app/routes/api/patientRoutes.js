@@ -22,6 +22,7 @@ const {
   verifyOTP,
   getPatientById,
   addAvatar,
+  getPatients,
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -48,6 +49,9 @@ const deletePatientEmbeddedDocs = require("../../middlewares/deletePatientEmbedd
 const router = express.Router();
 
 /*****************************ROUTES********************************/
+
+//get all patients
+router.get("/all", getPatients);
 
 // register a patient
 router.post(
@@ -114,4 +118,5 @@ router
   .get(getPatient)
   .patch(updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
+
 module.exports = router;
