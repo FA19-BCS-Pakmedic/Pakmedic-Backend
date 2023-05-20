@@ -54,11 +54,8 @@ exports.updateNotification = catchAsync(async (req, res, next) => {
 });
 
 exports.sendNotification = catchAsync(async (req, res, next) => {
-
-  console.log(req.body);
-
   try {
-    const { title, body, navigate, tokenID, image, user, data } = req.body;
+    const { title, body, navigate, tokenID, image, user } = req.body;
 
     const obj = await Notification.findOne({ user: user });
 
@@ -68,16 +65,13 @@ exports.sendNotification = catchAsync(async (req, res, next) => {
       );
     }
 
-
     const notification = {
       title: title ? title : "Results Are Ready!",
       body: body ? body : "Click here to view your results",
       data: {
         navigate: navigate ? navigate : "Xray",
         image: image ? image : "default",
-        data: data,
       },
-
       android: {
         smallIcon: "logo_circle",
         channelId: "default",

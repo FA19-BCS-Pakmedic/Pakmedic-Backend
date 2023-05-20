@@ -29,6 +29,9 @@ const reminderSchema = mongoose.Schema({
   endDate: {
     type: String,
   },
+  dosageDates: {
+    type: Array,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
