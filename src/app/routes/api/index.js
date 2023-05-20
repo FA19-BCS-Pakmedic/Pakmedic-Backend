@@ -21,7 +21,8 @@ routers.stripe = require("./stripeRoutes");
 routers.appointmentRequest = require("./appointmentRequestRoutes");
 routers.admin = require("./adminRoutes");
 routers.review = require("./reviewRoutes");
-routers.complaint = require('./complaintRoutes');
-routers.prescription = require('./prescriptionRoutes');
+routers.complaint = require("./complaintRoutes");
+routers.prescription = require("./prescriptionRoutes");
+routers.reminder = require("./reminderRoutes");
 
 module.exports = routers;

@@ -9,7 +9,11 @@ const {
   getAllAppointmentReqs,
 } = require("../../controllers/api/appointmentRequestController");
 
+const { verifyToken } = require("../../middlewares");
+
 const router = express.Router();
+
+// router.use(verifyToken);
 
 router.route("/").get(getAllAppointmentReqs).post(createAppointmentReq);
 
