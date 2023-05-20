@@ -1,6 +1,8 @@
 const { Server } = require("socket.io");
+const { sendNotification } = require("../utils/helpers");
 
 const Message = require("../models").message;
+const Notification = require("../models").notification;
 
 const IP = require("../utils/configs").ipConf;
 
@@ -69,9 +71,8 @@ module.exports = function (server) {
       socket.join(data.roomID);
 
       //get all the messages from the database with the roomId
-      const messages = await (
-        await Message.find({ roomID: data.roomID })
-      ).reverse();
+      const messages =
+        (await Message.find({ roomID: data.roomID })).reverse();
 
       console.log("room in join room event", data.roomID, messages);
 
@@ -101,6 +102,25 @@ module.exports = function (server) {
 
       await message.save();
 
+      const notificationObj = await Notification.findOne({user: data.receiver._id});
+
+      console.log(notificationObj, "NOTIFICATION OBJECT");
+
+      if(notificationObj){
+        
+        await sendNotification(
+          'New Message',
+          'You have a new message from ' + data.sender.name,
+          data.receiver._id,
+          "Chat",
+          data.sender._id,
+          null,
+          notificationObj.tokenID,
+        )
+      
+      }
+
+
       const giftedMessage = giftedChatMessage(
         message,
         data.sender,
@@ -109,22 +129,11 @@ module.exports = function (server) {
 
       console.log("room in message event", data.room);
 
-      // console.log("room users", io.in(data.room));
+      
+
 
       io.to(data.room).emit("new message", giftedMessage);
     });
-
-    // // Listen for message read events
-    // socket.on("message read", async (data) => {
-    //   // Update the isRead flag in the message document
-    //   await Message.findOneAndUpdate(
-    //     { _id: data.messageId },
-    //     { isRead: true },
-    //     (err) => {
-    //       if (err) throw err;
-    //     }
-    //   );
-    // });
 
     // Listen for typing events
     socket.on("typing", (data) => {
