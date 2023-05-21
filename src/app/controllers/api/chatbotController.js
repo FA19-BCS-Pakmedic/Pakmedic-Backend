@@ -20,8 +20,12 @@ exports.chatWithBot = catchAsync(async (req, res, next) => {
   const sessionId = req.body.sessionId;
   const message = req.body.message;
 
+  console.log(configuration, sessionId, message);
+
   //create a new session
   const sessionClient = new dialogflow.SessionsClient(configuration);
+
+  console.log(sessionClient);
 
   const sessionPath = sessionClient.projectAgentSessionPath(
     configuration.project_id,

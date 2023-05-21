@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 module.exports = {
   senderName: "Pakmedic Inc",
   senderEmail: "pakmedic.inc@pakmedic.com",

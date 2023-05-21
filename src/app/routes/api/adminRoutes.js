@@ -7,7 +7,7 @@ const {
 
 const 
 {
-    getDashboardStats, getAllUsers, getDoctorData, updateUser, getAllDoctors, register, login, getLoggedInAdmin
+    getDashboardStats, getAllUsers, getDoctorData, updateUser, getAllDoctors, register, login, getLoggedInAdmin, getUnresolvedData
 } = require("../../controllers/api/adminController");
 
 const ROLES = require("../../utils/constants/ROLES");
@@ -33,6 +33,8 @@ router.get('/doctors/:id', getDoctorData);
 router.get('/doctors', getAllDoctors);
 
 router.patch('/users/:id', updateUser);
+
+router.get("/unresolved-data", getUnresolvedData);
 
 
 module.exports = router;
