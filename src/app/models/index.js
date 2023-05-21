@@ -22,12 +22,10 @@ db.message = require("./Message");
 db.appointment = require("./Appointment");
 db.appointmentReq = require("./AppointmentRequest");
 db.review = require("./Review");
-db.complaint = require('./Complaint');
-db.prescription = require('./Prescription');
-db.admin = require('./Admin');
+db.complaint = require("./Complaint");
+db.prescription = require("./Prescription");
+db.admin = require("./Admin");
 db.notification = require("./Notification");
-
-
-
+db.reminder = require("./Reminder");
 
 module.exports = db;

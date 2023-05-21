@@ -276,6 +276,17 @@ exports.getPatient = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getPatients = catchAsync(async (req, res, next) => {
+  const patients = await Patient.find();
+
+  res.status(200).json({
+    success: true,
+    data: {
+      patients,
+    },
+  });
+});
+
 /******************************************PATIENT ACCOUNT VERIFICATION FUNCTIONALITY*******************************************/
 // verify patient's account
 exports.verifyPatient = catchAsync(async (req, res, next) => {

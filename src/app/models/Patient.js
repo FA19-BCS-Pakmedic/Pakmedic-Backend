@@ -35,7 +35,7 @@ const patientSchema = mongoose.Schema({
     required: [true, `${requiredError} phone number`],
   },
   dob: {
-    type: Date,
+    type: String,
     required: [true, `${requiredError} date of birth`],
   },
   gender: {
@@ -153,7 +153,6 @@ const patientSchema = mongoose.Schema({
     },
   ],
 
-
   status: {
     type: String,
     enum: ["Active", "Banned", "Warned", "Inactive", "active", "banned", "warned", "inactive"],
@@ -163,8 +162,7 @@ const patientSchema = mongoose.Schema({
   joined: {
     type: Date,
     default: Date.now(),
-    
-  }
+  },
 });
 
 // pre populate scans

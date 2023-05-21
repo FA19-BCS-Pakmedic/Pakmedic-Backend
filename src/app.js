@@ -10,7 +10,8 @@ const cookieParser = require("cookie-parser");
 const compression = require("compression");
 const cors = require("cors");
 
-// const fileUpload = require("express-fileupload");
+// const fileUpload = require("express-fileupload")
+const cronJobReminder = require("./app/utils/reminderCronJob");
 
 // importing utils
 const { AppError } = require("./app/utils/helpers");
@@ -47,7 +48,8 @@ const {
   admin: Admin,
   review,
   complaint,
-  prescription
+  prescription,
+  reminder,
 } = require("./app/routes/api");
 
 // Start express app
@@ -142,6 +144,9 @@ app.use("/api/v1/admin", Admin);
 app.use("/api/v1/reviews", review);
 app.use("/api/v1/complaints", complaint);
 app.use("/api/v1/prescriptions", prescription);
+app.use("/api/v1/reminder", reminder);
+
+cronJobReminder("0 8 * * *");
 
 // any irrelavant end point will hit this and throw error
 app.all("*", (req, res, next) => {

@@ -64,6 +64,8 @@ const router = express.Router();
 
 /*****************************ROUTES********************************/
 
+router.get("/all", getAllDoctors);
+
 // verify doctor pmc id
 router.post("/pmc/verify", [checkDuplicatePmc], verifyDoctorPMC);
 
