@@ -22,7 +22,7 @@ const router = express.Router();
 
 /***********************ROUTES*********************/
 
-// router.use(verifyToken);
+router.use(verifyToken);
 
 //add a community
 router.post("/", addCommunity);
@@ -45,6 +45,8 @@ router.patch("/leave/:id", leaveCommunity);
 //delete a community
 
 router.delete("/:id", deleteCommunity);
+
+
 
 // // security layer
 // router.use(verifyToken);
