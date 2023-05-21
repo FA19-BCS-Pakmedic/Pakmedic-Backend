@@ -26,8 +26,8 @@ module.exports = (user, statusCode, req, res) => {
 };
 
 // method to sign the token along with the payload
-const signToken = ({ _id, email, role }, time) => {
+const signToken = ({ _id, email, role }, expiresIn) => {
   return jwt.sign({ id: _id, email, role }, jwtConf.accessSecret, {
-    expiresIn: time,
+    expiresIn: expiresIn
   });
 };
