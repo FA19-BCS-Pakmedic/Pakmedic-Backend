@@ -15,7 +15,8 @@ const dbConf = {
     useUnifiedTopology: true,
   },
 };
-const connectionString = process.env.MONGO_CONNECTION_STRING;
-console.log(connectionString);
+// const connectionString = process.env.MONGO_CONNECTION_STRING;
+const connectionString = `mongodb://${dbConf.HOST}:${dbConf.PORT}/${dbConf.DB}`;
+
 
 module.exports = { dbConf, connectionString };
