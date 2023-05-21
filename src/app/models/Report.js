@@ -11,7 +11,7 @@ const reportSchema = mongoose.Schema({
     required: [true, `${requiredError} title`],
   },
   date: {
-    type: Date,
+    type: mongoose.Schema.Types.Mixed,
     default: new Date(),
   },
   symptoms: {

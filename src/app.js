@@ -13,6 +13,8 @@ const cors = require("cors");
 // const fileUpload = require("express-fileupload")
 const cronJobReminder = require("./app/utils/reminderCronJob");
 
+require('dotenv').config();
+
 // importing utils
 const { AppError } = require("./app/utils/helpers");
 const {

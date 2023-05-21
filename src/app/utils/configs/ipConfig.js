@@ -1,3 +1,6 @@
+require('dotenv').config();
+
+
 const endpoint = process.env.IMAGE_ENDPOINT;
 
 console.log(endpoint);
