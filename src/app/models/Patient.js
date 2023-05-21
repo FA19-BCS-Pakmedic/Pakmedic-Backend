@@ -156,7 +156,7 @@ const patientSchema = mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["active", "blocked", "warned", "inactive"],
+    enum: ["Active", "Banned", "Warned", "Inactive", "active", "banned", "warned", "inactive"],
     default: "active",
   },
 

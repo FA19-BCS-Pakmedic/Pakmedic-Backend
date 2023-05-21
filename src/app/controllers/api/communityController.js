@@ -44,12 +44,17 @@ exports.updateCommunity = factory.updateOne(CommunityModel);
 exports.deleteCommunity = factory.deleteOne(CommunityModel);
 
 exports.joinCommunity = catchAsync(async (req, res, next) => {
-  const communityId = req.params.id;
 
+
+  const communityId = req.params.id;
+  
   const userId = req.user._id;
+
   const role = req.user.role;
 
   const community = await Community.findById(communityId);
+
+  console.log(community, "COMMUNITY");
 
   if (!community) {
     return next(new AppError(noCommunityFound, 404));
@@ -57,17 +62,13 @@ exports.joinCommunity = catchAsync(async (req, res, next) => {
 
   const user =
     role === ROLES[0]
-      ? await Patient.findById(userId)
-      : await Doctor.findById(userId);
+      ? await Patient.findByIdAndUpdate(userId, { $push: { communities: communityId } }, { new: true })
+      : await Doctor.findByIdAndUpdate(userId, { $push: { communities: communityId } }, { new: true })
 
   if (!user) {
     return next(new AppError("No user found", 404));
-  }
-
-  user.communities.push(communityId);
-
-  await user.save();
-
+  }  
+  
   community.totalMember++;
 
   await community.save();
