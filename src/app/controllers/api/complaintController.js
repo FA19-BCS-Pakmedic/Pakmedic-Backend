@@ -19,17 +19,11 @@ exports.updateComplaintById = catchAsync(async(req, res) => {
     const {id} = req.params;
     const data = req.body;
 
-    console.log(req.body);
-
     const complaint = await Complaint.findByIdAndUpdate(id, {$set: {...data}}, {new: true});
 
     if(!complaint) {
         return next(new AppError('Complaint doesnt exists', 404));
     }
-
-    // const updatedComplaint = await Complaint.findById(complaint._id);
-
-    // console.log(updatedComplaint);
 
     const complainantId = complaint.complainant;
 
