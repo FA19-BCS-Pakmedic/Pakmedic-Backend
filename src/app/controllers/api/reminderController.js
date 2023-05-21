@@ -57,7 +57,7 @@ exports.createReminder = catchAsync(async (req, res, next) => {
   // Create an array of dates from startDate to endDate
   const dosageDates = [];
   const currentDate = new Date(startDateObj);
-  while (currentDate <= endDateObj) {
+  while (currentDate < endDateObj) {
     dosageDates.push(formatDate(currentDate));
     currentDate.setDate(currentDate.getDate() + 1);
   }
