@@ -384,6 +384,8 @@ const socialAuth = catchAsync(async (req, res, next, email, role, password) => {
 exports.updatePatient = catchAsync(async (req, res, next) => {
   id = req.user._id;
   data = req.body;
+
+  console.log(req.body);
   // console.log(req.cookie);
   // console.log(id, data);
 
