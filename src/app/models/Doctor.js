@@ -83,7 +83,7 @@ const doctorSchema = mongoose.Schema({
   reviews: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Review"
+      ref: "Review",
     },
   ],
 
@@ -123,14 +123,12 @@ const doctorSchema = mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
-  
   accessList: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Patient",
-    }
-  ]
-
+    },
+  ],
 });
 
 // pre function to prepopulate before find query
@@ -145,6 +143,10 @@ doctorSchema.pre(/^find/, function (next) {
     })
     .populate({
       path: "communities",
+      select: "-__v",
+    })
+    .populate({
+      path: "accessList",
       select: "-__v",
     });
   next();

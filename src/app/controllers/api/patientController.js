@@ -553,7 +553,7 @@ exports.handleEhrRequest = catchAsync(async(req, res, next) => {
 
     if(notification){
       await sendNotification(
-        title, body, doctorId, 'PatientList', patientId, null, notification.tokenID
+        title, body, doctorId, 'AssistantScreen', "", null, notification.tokenID
       );
     }
 
