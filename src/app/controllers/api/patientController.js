@@ -546,14 +546,14 @@ exports.handleEhrRequest = catchAsync(async(req, res, next) => {
       title="Ehr access request accepted";
       body = `Your request for ehr access has been accepted by ${req.user.name}`;
     } else if(status.toLowerCase() === 'reject' || status.toLowerCase() === 'revoke') {
-      doctor.accessList = doctor.accessList.filter((id) => id !== patientId);
+      doctor.accessList = doctor.accessList.filter((patient) => patient._id !== patientId);
       title="Ehr access request rejected";
       body = `Your request for ehr access has been rejected by ${req.user.name}`;
     }
 
     if(notification){
       await sendNotification(
-        title, body, doctorId, '', patientId, null, notification.tokenID
+        title, body, doctorId, 'PatientList', patientId, null, notification.tokenID
       );
     }
 
