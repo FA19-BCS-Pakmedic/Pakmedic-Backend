@@ -546,9 +546,9 @@ exports.handleEhrRequest = catchAsync(async(req, res, next) => {
       title="Ehr access request accepted";
       body = `Your request for ehr access has been accepted by ${req.user.name}`;
     } else if(status.toLowerCase() === 'reject' || status.toLowerCase() === 'revoke') {
-      doctor.accessList = doctor.accessList.filter((patient) => patient._id !== patientId);
-      title="Ehr access request rejected";
-      body = `Your request for ehr access has been rejected by ${req.user.name}`;
+      doctor.accessList = doctor.accessList.filter((patient) => patient._id.toString() !== patientId.toString());
+      title = `Ehr access request ${status}ed`;
+      body = `Your request for ehr access has been ${status}ed by ${req.user.name}`;
     }
 
     if(notification){
