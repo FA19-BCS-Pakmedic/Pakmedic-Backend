@@ -16,6 +16,7 @@ const {
   deleteFile,
   getGridFsFileStream,
   getGridFsStream,
+  sendNotification,
 } = require("../../utils/helpers");
 const { pmcConf } = require("../../utils/configs");
 const factory = require("./handlerFactory");
@@ -49,6 +50,7 @@ const {
 const db = require("../../models");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 const { client, init, getClient } = require("../../utils/helpers/voximplant");
+const { notification: Notification } = require("../../models");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
@@ -914,6 +916,41 @@ exports.addSignature = catchAsync(async (req, res, next) => {
     message: `Avatar ${successfullyAdded}`,
     data: {
       user: doctor,
+    },
+  });
+});
+
+
+
+exports.requestAccess = catchAsync(async(req, res) => {
+
+  const user = req.user;
+
+  const {id} = req.params;
+
+  const notification = await Notification.findOne({user: id});
+
+  console.log(notification);
+
+  if(notification) {
+
+    console.log("sending notification")
+    await sendNotification(
+      "New EHR access request",
+      `Dr.${user.name} is requesting access to your electronic health records`,
+      id,
+      "EhrRequest",
+      user._id,
+      null,
+      notification.tokenID
+    )
+  }
+
+  res.status(200).json({
+    success: true,
+    message: `Request sent successfully`,
+    data: {
+      user: user,
     },
   });
 });

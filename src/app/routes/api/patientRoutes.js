@@ -23,6 +23,7 @@ const {
   getPatientById,
   addAvatar,
   getPatients,
+  handleEhrRequest
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -94,6 +95,9 @@ router.patch(
 
 // middlewares to verify users
 router.use(verifyToken);
+
+
+router.post("/ehr-access", handleEhrRequest);
 
 //reset Password
 router.patch("/reset-password", [
