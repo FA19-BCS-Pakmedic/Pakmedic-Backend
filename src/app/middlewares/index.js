@@ -15,5 +15,6 @@ middlewares.singleFileUpload = require("./singleFileUpload");
 middlewares.deleteDoctorEmbeddedDocs = require("./deleteDoctorEmbeddedDocs");
 middlewares.uploadSingle = require('./uploadSingle');
 middlewares.checkDuplicateAppointment = require('./checkDuplicateAppointment');
+middlewares.checkUserStatus = require('./checkUserStatus');
 
 module.exports = middlewares;

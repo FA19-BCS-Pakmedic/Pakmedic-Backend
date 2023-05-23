@@ -111,7 +111,7 @@ exports.register = catchAsync(async (req, res, next) => {
 });
 
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password, isThirdParty } = req.body;
+  const { email, password, isThirdParty, status } = req.body;
 
   const user = await Patient.findOne({ email }).select("+password");
 
@@ -272,7 +272,7 @@ exports.getPatient = catchAsync(async (req, res, next) => {
   }
   res.status(200).json({
     success: true,
-    message: "Patient found",
+    message: user.status.toLowerCase().includes("warn") ? "You have received a warning, kindly be more careful in future" : "Login successful",
     data: {
       user,
     },

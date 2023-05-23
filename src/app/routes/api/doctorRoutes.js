@@ -49,6 +49,7 @@ const {
   deleteDoctorEmbeddedDocs,
   upload,
   uploadSingle,
+  checkUserStatus,
 } = require("../../middlewares");
 
 // import utils
@@ -78,7 +79,7 @@ router.post("/register", [doctorDataValidator, checkDuplicateDoctor], register);
 router.get("/verify/:id", verifyDoctor);
 
 // login a doctor
-router.post("/login", login);
+router.post("/login", [checkUserStatus("doctor")], login);
 
 // third party login routes
 // router.post("/login/facebook", facebookLogin);
@@ -128,7 +129,7 @@ router.patch("/reset-password", [
 // update and delete profile routes
 router
   .route("/")
-  .get(getDoctor)
+  .get([checkUserStatus("doctor")], getDoctor)
   // .patch([doctorDataValidator], updateDoctor)
   .patch(updateDoctor)
   .delete([deleteDoctorEmbeddedDocs], deleteDoctor);

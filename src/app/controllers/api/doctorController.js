@@ -199,7 +199,7 @@ exports.getDoctor = catchAsync(async (req, res, next) => {
   }
   res.status(200).json({
     success: true,
-    message: "Doctor found",
+    message: user.status.toLowerCase().includes("warn") ? "You have received a warning, kindly be more careful in future" : "Login successful",
     data: {
       user,
     },
