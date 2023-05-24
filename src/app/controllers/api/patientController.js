@@ -46,6 +46,8 @@ const { stripeClient } = require("../../utils/helpers/stripe");
 const Patient = db.patient;
 const Doctor = db.doctor;
 const Notification = db.notification;
+const Appointment = db.appointment;
+const Post = db.post;
 
 // method to sign up patient
 exports.register = catchAsync(async (req, res, next) => {
@@ -553,7 +555,7 @@ exports.handleEhrRequest = catchAsync(async(req, res, next) => {
 
     if(notification){
       await sendNotification(
-        title, body, doctorId, 'AssistantScreen', "", null, notification.tokenID
+        title, body, doctorId, 'AssistantScreen', "test", null, notification.tokenID
       );
     }
 
@@ -564,4 +566,47 @@ exports.handleEhrRequest = catchAsync(async(req, res, next) => {
       message: 'Request handled successfully'
     });
 
-})
+});
+
+exports.getPatientDashboardData = catchAsync(async(req, res) => {
+
+  const {id} = req.params;
+
+  const appointments = await Appointment.find({patient: id, status: 'upcoming'});
+
+  //only select the field speciality from the doctor model
+  let topSpecialities = await Doctor.aggregate([
+    { $project: { speciality: 1 } },
+    { $group: { _id: '$speciality', count: { $sum: 1 } } },
+    { $limit: 5 },
+  ]);
+
+
+  topSpecialities = topSpecialities.map((speciality) => {
+    return speciality._id;
+  });
+
+  const doctorQueryResult = await Doctor.aggregate([
+    { $lookup: { from: 'reviews', localField: '_id', foreignField: 'doctor', as: 'reviews' } },
+    { $addFields: { avgRating: { $avg: '$reviews.ratings' }, reviewCount: { $size: '$reviews' } } },
+    { $sort: { avgRating: -1, reviewCount: -1 } },
+    { $limit: 5 }
+  ]);
+
+  console.log(doctorQueryResult);
+
+  const latestPost = await Post.find().sort({date: -1}).limit(1);
+
+  console.log(latestPost, "LATEST POST");
+
+  res.status(200).json({
+    success: true,
+    data: {
+      appointments,
+      topDoctors: doctorQueryResult,
+      latestPost,
+      topSpecialities,
+    }
+  });
+
+});

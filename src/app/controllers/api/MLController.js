@@ -35,6 +35,7 @@ exports.brainMRI = catchAsync(async (req, res, next) => {
           user: message[3],
           tokenID: message[2],
           image: message[1],
+          data: "test",
           navigate: "ResultsScreen",
         }),
       });
@@ -69,6 +70,7 @@ exports.chestXray = catchAsync(async (req, res, next) => {
           user: message[3],
           tokenID: message[2],
           image: message[1],
+          data: "test",
           navigate: "ResultsScreen",
         }),
       });

@@ -23,7 +23,8 @@ const {
   getPatientById,
   addAvatar,
   getPatients,
-  handleEhrRequest
+  handleEhrRequest,
+  getPatientDashboardData
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -123,5 +124,7 @@ router
   .get([checkUserStatus("patient")], getPatient)
   .patch(updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
+
+router.get('/dashboard/:id', getPatientDashboardData);
 
 module.exports = router;

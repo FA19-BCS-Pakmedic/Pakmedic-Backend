@@ -17,13 +17,12 @@ const PostSchema = new mongoose.Schema({
   },
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    required: [true, `${requiredError} author`],
     refPath: "authorType",
+    required: true,
   },
   authorType: {
     type: String,
     enum: Object.values(ROLES),
-    required: [true, `${requiredError} authorType`],
   },
   file: {
     type: String,
@@ -51,14 +50,14 @@ PostSchema.pre(/^find/, function (next) {
     path: "author",
     select: "-__v",
   })
-    .populate({
-      path: "community",
-      select: "name",
-    })
-    .populate({
-      path: "comments",
-      select: "-__v",
-    });
+  .populate({
+    path: "community",
+    select: "-__v",
+  })
+  .populate({
+    path: "comments",
+    select: "-__v",
+  });
   next();
 });
 
