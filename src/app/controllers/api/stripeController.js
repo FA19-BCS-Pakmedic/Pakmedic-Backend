@@ -70,11 +70,13 @@ exports.createPaymentMethod = catchAsync(async (req, res) => {
     );
 
     //update the customer with the payment method
-    await stripe.stripeClient.customers.update(id, {
+    const updatedCustomer = await stripe.stripeClient.customers.update(id, {
       invoice_settings: {
         default_payment_method: paymentMethod.id,
       },
     });
+
+    console.log(updatedCustomer);
   }
 
   res.json({
@@ -89,9 +91,15 @@ exports.createPaymentMethod = catchAsync(async (req, res) => {
 exports.getCustomer = catchAsync(async (req, res) => {
   const { id } = req.params;
 
+  console.log(id);
+
   // get customer from stripe along with their payment method
 
   const customer = await stripe.stripeClient.customers.retrieve(id);
+
+  console.log(customer);
+
+  console.log(customer.invoice_settings.default_payment_method);
 
   const paymentMethod = await stripe.stripeClient.paymentMethods.retrieve(
     customer.invoice_settings.default_payment_method

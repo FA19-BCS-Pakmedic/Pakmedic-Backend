@@ -101,7 +101,7 @@ exports.register = catchAsync(async (req, res, next) => {
   const client = getClient();
 
   console.log(client);
-  await client.Users.addUser(data);
+  console.log(await client.Users.addUser(data));
 
   //  3) If everything ok, send token to client
   createSendToken(user, 200, req, res);
