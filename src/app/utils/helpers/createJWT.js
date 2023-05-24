@@ -25,7 +25,7 @@ module.exports = (user, statusCode, req, res) => {
 
   res.status(statusCode).json({
     status: "success",
-    message: user.status && user.status.toLowerCase().includes("warn") ? "You have received a warning, kindly be more careful in future" : "Login successful",
+    message: user?.status && user.status.toLowerCase().includes("warn") ? "You have received a warning, kindly be more careful in future" : "Login successful",
     token,
     user,
   });

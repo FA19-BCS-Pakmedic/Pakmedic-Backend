@@ -13,7 +13,7 @@ const checkUserStatus = ((role) => catchAsync(async (req, res, next) => {
 
     const user = await Model[role].findOne(query);
     
-    if (user.status.toLowerCase().includes('ban')) {
+    if (user?.status && user.status.toLowerCase().includes('ban')) {
         return next(new AppError('Your account is banned, kindly contact our support team at pakmedic.inc@gmail.com', 401));
     }
 

@@ -1009,6 +1009,8 @@ exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
 
   const data = Object.values(paymentsByMonth);
 
+  console.log(appointments);
+
   res.status(200).json({
     success: true,
     message: `Request sent successfully`,

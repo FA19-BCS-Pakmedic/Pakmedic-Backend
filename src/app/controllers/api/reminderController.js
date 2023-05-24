@@ -89,7 +89,7 @@ exports.printReminder = catchAsync(async (req, res, next) => {
         "Time to Take Your Medicine " + reminder.name,
         reminder.user,
         "MedicineScheduler",
-        null,
+        "test",
         null,
         notificationObj.tokenID
       );

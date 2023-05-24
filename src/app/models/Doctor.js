@@ -148,6 +148,9 @@ doctorSchema.pre(/^find/, function (next) {
     .populate({
       path: "accessList",
       select: "-__v",
+    }).populate({
+      path: "reviews",
+      select: "-__v",
     });
   next();
 });
