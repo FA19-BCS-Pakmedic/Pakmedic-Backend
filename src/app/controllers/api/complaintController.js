@@ -38,7 +38,7 @@ exports.updateComplaintById = catchAsync(async(req, res) => {
             `Your complaint status has updated`,
             `Your complaint status has updated to ${complaint.status}`,
             complainantId,
-            "", //TODO: ADD COMPLAINT DETAILS SCREEN NAME,
+            "Complaint", 
             complaint._id,
             null,
             notification.tokenID,

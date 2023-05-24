@@ -13,6 +13,8 @@ const cors = require("cors");
 // const fileUpload = require("express-fileupload")
 const cronJobReminder = require("./app/utils/reminderCronJob");
 
+const cronJobAppointment = require("./app/utils/appointmentCronJob");
+
 require('dotenv').config();
 
 // importing utils
@@ -149,6 +151,7 @@ app.use("/api/v1/prescriptions", prescription);
 app.use("/api/v1/reminder", reminder);
 
 cronJobReminder("0 8 * * *");
+cronJobAppointment();
 
 // any irrelavant end point will hit this and throw error
 app.all("*", (req, res, next) => {

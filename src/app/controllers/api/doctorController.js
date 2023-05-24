@@ -17,6 +17,7 @@ const {
   getGridFsFileStream,
   getGridFsStream,
   sendNotification,
+  stripe,
 } = require("../../utils/helpers");
 const { pmcConf } = require("../../utils/configs");
 const factory = require("./handlerFactory");
@@ -50,7 +51,7 @@ const {
 const db = require("../../models");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 const { client, init, getClient } = require("../../utils/helpers/voximplant");
-const { notification: Notification } = require("../../models");
+const { notification: Notification, appointment: Appointment } = require("../../models");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
@@ -199,7 +200,7 @@ exports.getDoctor = catchAsync(async (req, res, next) => {
   }
   res.status(200).json({
     success: true,
-    message: "Doctor found",
+    message: user.status.toLowerCase().includes("warn") ? "You have received a warning, kindly be more careful in future" : "Login successful",
     data: {
       user,
     },
@@ -954,3 +955,105 @@ exports.requestAccess = catchAsync(async(req, res) => {
     },
   });
 });
+
+exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
+ 
+  const {id} = req.params;
+
+  console.log(id);
+
+  const appointments = await Appointment.find({doctor: id, status: 'upcoming'});
+
+
+  // get the count of appointments grouped by the patient location
+  const appointmentsByLocation = await Appointment.aggregate([
+    {
+      $lookup: {
+        from: "patients",  // Replace "patients" with the actual name of the patient collection
+        localField: "patient",
+        foreignField: "_id",
+        as: "patientInfo"
+      }
+    },
+    {
+      $group: {
+        _id: "$patientInfo.location",
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  console.log(appointmentsByLocation);
+
+  
+  //get doctors payment 
+
+  let payments = await stripe.stripeClient.paymentIntents.list({
+    limit: 100,
+  });
+
+  payments = payments.data.filter(
+    (payment) => payment.metadata.doctorId === id
+  );
+
+
+  const paymentsByMonth = calculateTotalAmountReceivedByMonth(payments);
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+
+
+  const labels = Object.keys(paymentsByMonth).map((key) => {
+    return months[Number(key)-1]
+  });
+
+  const data = Object.values(paymentsByMonth);
+
+  console.log(appointments);
+
+  res.status(200).json({
+    success: true,
+    message: `Request sent successfully`,
+    data: {
+      appointments: appointments,
+      locations: appointmentsByLocation,
+      payments: {
+        labels: labels,
+        datasets: [
+          {
+            data: data,
+          }
+        ]
+      }
+    },
+
+  })
+
+
+})
+
+
+// Function to calculate the total amount received for each month until the current month of the current year
+function calculateTotalAmountReceivedByMonth(paymentIntents) {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // Month is 0-based index (January is 0)
+  
+  const monthlyAmounts = {};
+  
+  for (let i = 1; i <= currentMonth; i++) {
+    monthlyAmounts[i] = 0;
+  }
+  
+  paymentIntents.forEach(paymentIntent => {
+    const paymentDate = new Date(paymentIntent.created * 1000); // Convert Unix timestamp to milliseconds
+    const paymentYear = paymentDate.getFullYear();
+    const paymentMonth = paymentDate.getMonth() + 1;
+    
+    if (paymentYear === currentYear && paymentMonth <= currentMonth) {
+      monthlyAmounts[paymentMonth] += paymentIntent.amount_received/100;
+    }
+  });
+  
+  return monthlyAmounts;
+}

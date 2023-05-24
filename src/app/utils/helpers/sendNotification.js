@@ -7,8 +7,8 @@ const sendNotification = async (title, body, user, navigate, data, image, tokenI
         body: body || ``,
         user: user || "",
         navigate: navigate || "",
-        data: data || null,
-        image: image || null,
+        data: data || "",
+        image: image || "",
         tokenID: tokenId || "",
       }
       

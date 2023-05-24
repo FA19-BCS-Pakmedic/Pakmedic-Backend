@@ -8,6 +8,13 @@ const factory = require("./handlerFactory");
 exports.createAppointment = catchAsync(async (req, res, next) => {
   const data = req.body;
 
+
+  // set date to midnight of the same date
+  data.date = new Date(data.date);
+  
+  data.date.setHours(0, 0, 0, 0);
+  // console.log(data);
+
   const appointment = new Appointment(data);
 
   await appointment.save();

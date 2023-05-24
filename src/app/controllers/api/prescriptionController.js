@@ -1,11 +1,13 @@
 const {
     AppError,
     catchAsync,
+    sendNotification,
     
 } = require('../../utils/helpers');
 
 const Prescription = require('../../models').prescription;
 const Patient = require('../../models').patient;
+const Notification = require('../../models').notification;
 
 const factory = require('./handlerFactory');
 
@@ -47,6 +49,20 @@ exports.addPrescription = catchAsync(async(req, res) => {
     const prescription = new Prescription(data);
 
     await prescription.save();
+
+    const notification = await Notification.findOne({user: patient._id});
+
+    if(notification) {
+        await sendNotification(
+            "A new prescription has been added",
+            `Dr. ${req.user.name} has added a new prescription for you`,
+            patient._id.toString(),
+            "PrescriptionDetail",
+            prescription._id,
+            "",
+            notification.tokenID
+        );
+    }
 
     res.status(200).json({
         status: 'success',
