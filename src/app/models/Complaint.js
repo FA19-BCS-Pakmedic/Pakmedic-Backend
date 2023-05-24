@@ -32,7 +32,7 @@ const complaintSchema = mongoose.Schema({
 
   type: {
     type: String,
-    enum: ["Comment", "Post", "General"],
+    enum: ["Comment", "Post", "General", "User"],
     default: "General",
   },
   complaint: {

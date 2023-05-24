@@ -28,7 +28,7 @@ exports.updateAppointmentReq = catchAsync(async (req, res, next) => {
 
   const { appointment, time, date } = updatedAppointmentReq;
 
-  console.log(appointment);
+  date.setHours(0, 0, 0, 0);
 
   if (updatedAppointmentReq.isApproved) {
     let updatedAppointment;

@@ -6,9 +6,14 @@ const {
   getAppointment,
 } = require("../../controllers/api/appointmentController");
 
+
+const {verifyToken, checkDuplicateAppointment} = require('../../middlewares')
+
 const router = express.Router();
 
-router.route("/").post(createAppointment).get(getAllAppointments);
+router.use(verifyToken);
+
+router.route("/").post([checkDuplicateAppointment, createAppointment]).get(getAllAppointments);
 
 router.get("/:id", getAppointment);
 

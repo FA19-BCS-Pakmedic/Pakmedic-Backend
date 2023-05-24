@@ -23,7 +23,8 @@ const {
   getPatientById,
   addAvatar,
   getPatients,
-  handleEhrRequest
+  handleEhrRequest,
+  getPatientDashboardData
 } = require("../../controllers/api/patientController");
 
 // import middlewares
@@ -35,6 +36,7 @@ const {
   fetchAddress,
   singleFileUpload,
   uploadSingle,
+  checkUserStatus,
 } = require("../../middlewares");
 
 // import utils
@@ -70,7 +72,7 @@ router.post(
 router.get("/verify/:id", verifyPatient);
 
 // login a patient
-router.post("/login", login);
+router.post("/login", [checkUserStatus("patient")], login);
 
 // third party login routes
 router.post("/login/facebook", facebookLogin);
@@ -119,8 +121,10 @@ router
 
 router
   .route("/")
-  .get(getPatient)
+  .get([checkUserStatus("patient")], getPatient)
   .patch(updatePatient)
   .delete([deletePatientEmbeddedDocs], deletePatient);
+
+router.get('/dashboard/:id', getPatientDashboardData);
 
 module.exports = router;
