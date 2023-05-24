@@ -17,6 +17,7 @@ const {
   getGridFsFileStream,
   getGridFsStream,
   sendNotification,
+  stripe,
 } = require("../../utils/helpers");
 const { pmcConf } = require("../../utils/configs");
 const factory = require("./handlerFactory");
@@ -987,7 +988,26 @@ exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
   
   //get doctors payment 
 
+  let payments = await stripe.stripeClient.paymentIntents.list({
+    limit: 100,
+  });
 
+  payments = payments.data.filter(
+    (payment) => payment.metadata.doctorId === id
+  );
+
+
+  const paymentsByMonth = calculateTotalAmountReceivedByMonth(payments);
+
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+
+
+  const labels = Object.keys(paymentsByMonth).map((key) => {
+    return months[Number(key)-1]
+  });
+
+  const data = Object.values(paymentsByMonth);
 
   res.status(200).json({
     success: true,
@@ -995,8 +1015,43 @@ exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
     data: {
       appointments: appointments,
       locations: appointmentsByLocation,
-    }
+      payments: {
+        labels: labels,
+        datasets: [
+          {
+            data: data,
+          }
+        ]
+      }
+    },
+
   })
 
 
 })
+
+
+// Function to calculate the total amount received for each month until the current month of the current year
+function calculateTotalAmountReceivedByMonth(paymentIntents) {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1; // Month is 0-based index (January is 0)
+  
+  const monthlyAmounts = {};
+  
+  for (let i = 1; i <= currentMonth; i++) {
+    monthlyAmounts[i] = 0;
+  }
+  
+  paymentIntents.forEach(paymentIntent => {
+    const paymentDate = new Date(paymentIntent.created * 1000); // Convert Unix timestamp to milliseconds
+    const paymentYear = paymentDate.getFullYear();
+    const paymentMonth = paymentDate.getMonth() + 1;
+    
+    if (paymentYear === currentYear && paymentMonth <= currentMonth) {
+      monthlyAmounts[paymentMonth] += paymentIntent.amount_received/100;
+    }
+  });
+  
+  return monthlyAmounts;
+}
