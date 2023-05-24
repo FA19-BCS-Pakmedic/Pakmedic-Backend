@@ -2,6 +2,7 @@
 
 // console.log(process.env.DB_PORT, process.env.DB_HOST, process.env.DB_DATABASE);
 // console.log(process.env.DB_PORT, process.env.DB_HOST, process.env.DB_DATABASE);
+require('dotenv').config();
 
 const dbConf = {
   PORT: process.env.DB_PORT || 8080,
@@ -14,6 +15,8 @@ const dbConf = {
     useUnifiedTopology: true,
   },
 };
+// const connectionString = process.env.MONGO_CONNECTION_STRING;
 const connectionString = `mongodb://${dbConf.HOST}:${dbConf.PORT}/${dbConf.DB}`;
+
 
 module.exports = { dbConf, connectionString };

@@ -1,3 +1,7 @@
+require('dotenv').config();
+
+
+
 module.exports = {
   type: process.env.DIALOGFLOW_API_type,
   project_id: process.env.DIALOGFLOW_API_project_id,

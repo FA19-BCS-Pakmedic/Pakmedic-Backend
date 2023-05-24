@@ -1,5 +1,6 @@
 // importing utils
 const { AppError, catchAsync } = require("../../utils/helpers");
+require('dotenv').config();
 
 const request = require("request");
 const { Worker } = require("worker_threads");

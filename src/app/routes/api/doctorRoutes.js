@@ -34,6 +34,7 @@ const {
   getDoctor,
   addAvatar,
   getAllDoctors,
+  requestAccess,
   // getAvatar,
 } = require("../../controllers/api/doctorController");
 
@@ -65,6 +66,7 @@ const router = express.Router();
 /*****************************ROUTES********************************/
 
 router.get("/all", getAllDoctors);
+
 
 // verify doctor pmc id
 router.post("/pmc/verify", [checkDuplicatePmc], verifyDoctorPMC);
@@ -104,6 +106,9 @@ router.get("/hospitals", findDoctorsByHospital);
 
 // middlewares to verify users
 router.use(verifyToken);
+
+router.post('/request-access/:id', requestAccess);
+
 
 // find doctors
 router.get("/filter", getAllDoctors);
@@ -161,6 +166,5 @@ router
   .patch(addUpdateAbout)
   .delete(removeAbout);
 
-/*******************************DOCTOR's SIGNATURE *********************/
 
 module.exports = router;

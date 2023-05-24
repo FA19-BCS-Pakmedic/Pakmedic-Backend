@@ -5,7 +5,7 @@ const Patient = require("../../models").patient;
 const Complaint = require("../../models").complaint;
 const Review = require('../../models').review;
 const Admin = require('../../models').admin;
-// const AppointmentRequests = require("../../models").appointmentReq;
+const AppointmentRequest = require("../../models").appointmentReq;
 const mongoose = require("mongoose");
 
 const APIFeatures = require("../../utils/helpers/apiFeatures");
@@ -380,3 +380,17 @@ exports.getLoggedInAdmin = catchAsync(async(req, res, next) => {
 
 })
 
+exports.getUnresolvedData = catchAsync(async(req, res, next) => {
+ 
+  const complaints = await Complaint.find({status: 'Pending'});
+  const appointments = await AppointmentRequest.find({isApproved: false, isRejected: false});
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      complaints,
+      appointments,
+    },
+  });
+
+});

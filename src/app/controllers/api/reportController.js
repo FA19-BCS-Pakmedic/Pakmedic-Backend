@@ -66,7 +66,7 @@ exports.createReport = catchAsync(async (req, res, next) => {
         file: data.file,
       });
 
-      data.file = uploadToMongo(extractedData.html, extractedData.filename);
+      data.file = await uploadToMongo(extractedData.html, extractedData.filename);
     }
   }
 

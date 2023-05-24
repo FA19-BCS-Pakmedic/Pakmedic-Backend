@@ -55,7 +55,7 @@ exports.updateNotification = catchAsync(async (req, res, next) => {
 
 exports.sendNotification = catchAsync(async (req, res, next) => {
   try {
-    const { title, body, navigate, tokenID, image, user } = req.body;
+    const { title, body, navigate, tokenID, image, user, data } = req.body;
 
     const obj = await Notification.findOne({ user: user });
 
@@ -71,6 +71,7 @@ exports.sendNotification = catchAsync(async (req, res, next) => {
       data: {
         navigate: navigate ? navigate : "Xray",
         image: image ? image : "default",
+        data: data ? data : null,
       },
       android: {
         smallIcon: "logo_circle",

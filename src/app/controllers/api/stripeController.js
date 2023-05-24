@@ -198,17 +198,47 @@ exports.getCustomerPayments = catchAsync(async (req, res) => {
 exports.getPaymentsReceived = catchAsync(async (req, res) => {
   const { id } = req.params;
 
-  let payments = await stripe.stripeClient.paymentIntents.list();
+  // expand the customer field
+  let payments = await stripe.stripeClient.paymentIntents.list({
+    limit: 100,
+    expand: ["data.customer"],
+  });
+
+
 
   // get all the payments with metadata.doctorId === id
   payments = payments.data.filter(
     (payment) => payment.metadata.doctorId === id
   );
 
+   //calculate total earnings for the current month
+   const currentMonth = new Date().getMonth();
+
+  //calculate total earnings
+  const totalEarnings = payments.reduce((acc, payment) => {
+    return acc + payment.amount;
+  }, 0);
+
+  //calculate average earnings by month
+  const averageEarnings = totalEarnings / currentMonth;
+
+
+  currentMonthPayments = payments.filter((payment) => {
+    const paymentMonth = new Date(payment.created * 1000).getMonth();
+    return paymentMonth === currentMonth;
+  });
+
+  const currentMonthEarnings = currentMonthPayments.reduce((acc, payment) => {
+    return acc + payment.amount;
+  }, 0);
+
   return res.status(200).json({
     status: "success",
     data: {
       payments: payments,
+      totalEarnings: totalEarnings/100,
+      averageEarnings: averageEarnings/100,
+      currentMonthEarnings: currentMonthEarnings/100,
     },
   });
 });

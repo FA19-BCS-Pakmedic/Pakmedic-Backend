@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { AppError, deleteFile } = require("../utils/helpers");
 
 const handleCastErrorDB = (err) => {

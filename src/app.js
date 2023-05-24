@@ -13,6 +13,8 @@ const cors = require("cors");
 // const fileUpload = require("express-fileupload")
 const cronJobReminder = require("./app/utils/reminderCronJob");
 
+require('dotenv').config();
+
 // importing utils
 const { AppError } = require("./app/utils/helpers");
 const {
@@ -135,11 +137,11 @@ app.use("/api/v1/communities", community);
 app.use("/api/v1/posts", post);
 app.use("/api/v1/comments", comment);
 app.use("/api/v1/files", file);
+app.use("/api/v1/appointments/requests", appointmentRequest);
 app.use("/api/v1/appointments", appointment);
 app.use("/api/v1/ML", ml);
 app.use("/api/v1/notifications", notification);
 app.use("/api/v1/stripe", stripe);
-app.use("/api/v1/appointments/requests", appointmentRequest);
 app.use("/api/v1/admin", Admin);
 app.use("/api/v1/reviews", review);
 app.use("/api/v1/complaints", complaint);

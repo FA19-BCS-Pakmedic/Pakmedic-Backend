@@ -14,6 +14,7 @@ const {
   sendMail,
   getConfCodeEmailTemplate,
   stripe,
+  sendNotification,
 } = require("../../utils/helpers");
 
 // importing response messages
@@ -43,6 +44,8 @@ const db = require("../../models");
 const { init, getClient } = require("../../utils/helpers/voximplant");
 const { stripeClient } = require("../../utils/helpers/stripe");
 const Patient = db.patient;
+const Doctor = db.doctor;
+const Notification = db.notification;
 
 // method to sign up patient
 exports.register = catchAsync(async (req, res, next) => {
@@ -519,3 +522,46 @@ exports.addAvatar = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.handleEhrRequest = catchAsync(async(req, res, next) => {
+ 
+    const {doctorId, status} = req.body;
+
+    const patientId = req.user._id;
+
+    const doctor = await Doctor.findById(doctorId);
+
+    const notification = await Notification.findOne({user: doctorId});
+
+    let title = '';
+    let body = '';
+
+  
+    
+    if(status.toLowerCase() === 'accept') {
+      if(doctor.accessList.includes(patientId)) {
+        return next(new AppError('Access already provided', 400));
+      }
+      doctor.accessList.push(patientId);
+      title="Ehr access request accepted";
+      body = `Your request for ehr access has been accepted by ${req.user.name}`;
+    } else if(status.toLowerCase() === 'reject' || status.toLowerCase() === 'revoke') {
+      doctor.accessList = doctor.accessList.filter((patient) => patient._id.toString() !== patientId.toString());
+      title = `Ehr access request ${status}ed`;
+      body = `Your request for ehr access has been ${status}ed by ${req.user.name}`;
+    }
+
+    if(notification){
+      await sendNotification(
+        title, body, doctorId, 'AssistantScreen', "", null, notification.tokenID
+      );
+    }
+
+    await doctor.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Request handled successfully'
+    });
+
+})

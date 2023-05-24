@@ -31,13 +31,13 @@ const router = express.Router();
 
 // authorization
 router.use(verifyToken);
-router.use(authorizeRole(ROLES[0])); // for now it is only accessible to the patient themselves, after implementation of the patient's grant permission to access ehr to the doctor functionality this will be replaced
+router.use(authorizeRole(ROLES[0], ROLES[1])); // for now it is only accessible to the patient themselves, after implementation of the patient's grant permission to access ehr to the doctor functionality this will be replaced
 
 // create a scan
 router.post("/", createScan); //single file upload should be replaced with multiple files upload issue#42
 
 // search scans by patient id
-router.get("/patients", getScansByPatientId);
+router.get("/patients/:id", getScansByPatientId);
 
 // search a scan by id
 router.get("/:id", getScanById);

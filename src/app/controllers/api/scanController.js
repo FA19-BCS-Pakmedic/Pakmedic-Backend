@@ -113,6 +113,7 @@ exports.getScanById = catchAsync(async (req, res, next) => {
 exports.getScansByPatientId = catchAsync(async (req, res, next) => {
   // get the patient id
   const id = req.decoded?.id || req.params?.id;
+  const type = req?.query?.type;
 
   // find the patient
   const patient = await Patient.findById(id)
@@ -136,6 +137,18 @@ exports.getScansByPatientId = catchAsync(async (req, res, next) => {
   //  flatten the array
   const scans = patient.scans.concat(...familyScans);
 
+  // filter scans based on the "mri" query parameter
+  const filteredScans =
+    type === "xray"
+      ? scans.filter((scan) => !scan.image.endsWith(".nii.gz"))
+      : type === "mri"
+      ? scans.filter((scan) => scan.image.endsWith(".nii.gz"))
+      : scans;
+
+  if (!filteredScans.length > 0) {
+    return next(new AppError(noScansFound, 404));
+  }
+
   if (!scans.length > 0) {
     return next(new AppError(noScansFound, 404));
   }
@@ -143,7 +156,7 @@ exports.getScansByPatientId = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     data: {
-      scans,
+      scans: filteredScans,
     },
   });
 });
