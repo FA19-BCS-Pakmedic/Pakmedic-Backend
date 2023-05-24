@@ -50,7 +50,7 @@ const {
 const db = require("../../models");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 const { client, init, getClient } = require("../../utils/helpers/voximplant");
-const { notification: Notification } = require("../../models");
+const { notification: Notification, appointment: Appointment } = require("../../models");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
@@ -954,3 +954,49 @@ exports.requestAccess = catchAsync(async(req, res) => {
     },
   });
 });
+
+exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
+ 
+  const {id} = req.params;
+
+  console.log(id);
+
+  const appointments = await Appointment.find({doctor: id, status: 'upcoming'});
+
+
+  // get the count of appointments grouped by the patient location
+  const appointmentsByLocation = await Appointment.aggregate([
+    {
+      $lookup: {
+        from: "patients",  // Replace "patients" with the actual name of the patient collection
+        localField: "patient",
+        foreignField: "_id",
+        as: "patientInfo"
+      }
+    },
+    {
+      $group: {
+        _id: "$patientInfo.location",
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  console.log(appointmentsByLocation);
+
+  
+  //get doctors payment 
+
+
+
+  res.status(200).json({
+    success: true,
+    message: `Request sent successfully`,
+    data: {
+      appointments: appointments,
+      locations: appointmentsByLocation,
+    }
+  })
+
+
+})

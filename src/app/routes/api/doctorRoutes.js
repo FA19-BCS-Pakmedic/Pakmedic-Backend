@@ -35,6 +35,7 @@ const {
   addAvatar,
   getAllDoctors,
   requestAccess,
+  getDoctorDashboardData
   // getAvatar,
 } = require("../../controllers/api/doctorController");
 
@@ -166,6 +167,9 @@ router
   .post(addUpdateAbout)
   .patch(addUpdateAbout)
   .delete(removeAbout);
+
+router.get('/dashboard/:id', getDoctorDashboardData);
+
 
 
 module.exports = router;
