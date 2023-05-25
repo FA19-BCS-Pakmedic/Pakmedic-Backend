@@ -1,10 +1,15 @@
-const { AppError, catchAsync, matchEncryptions, createSendToken } = require("../../utils/helpers");
+const {
+  AppError,
+  catchAsync,
+  matchEncryptions,
+  createSendToken,
+} = require("../../utils/helpers");
 const Appointment = require("../../models").appointment;
 const Doctor = require("../../models").doctor;
 const Patient = require("../../models").patient;
 const Complaint = require("../../models").complaint;
-const Review = require('../../models').review;
-const Admin = require('../../models').admin;
+const Review = require("../../models").review;
+const Admin = require("../../models").admin;
 const AppointmentRequest = require("../../models").appointmentReq;
 const mongoose = require("mongoose");
 
@@ -13,16 +18,14 @@ const ROLES = require("../../utils/constants/ROLES");
 
 const factory = require("./handlerFactory");
 
-
 exports.getAllDoctors = factory.getAll(Doctor);
 
-exports.getDashboardStats = catchAsync(async(req, res, next) => {
+exports.getDashboardStats = catchAsync(async (req, res, next) => {
+  // appointments by month
+  const currentYear = new Date().getFullYear();
 
-    // appointments by month
-    const currentYear = new Date().getFullYear();
-  
-    console.log(currentYear);
-  
+  console.log(currentYear);
+
   const appointmentsByMonth = await Appointment.aggregate([
     {
       $match: {
@@ -55,7 +58,7 @@ exports.getDashboardStats = catchAsync(async(req, res, next) => {
     {
       $sort: { "_id.month": 1 },
     },
-  
+
     {
       $group: {
         _id: "$_id.isOnline",
@@ -83,292 +86,278 @@ exports.getDashboardStats = catchAsync(async(req, res, next) => {
       },
     },
   ]);
-  
-  
-  const onlineCounts = appointmentsByMonth
-    .find(({ type }) => type === true)
-    .data;
-  
-  const physicalCounts = appointmentsByMonth
-    .find(({ type }) => type === false)
-    .data;
-  
-  
+
+  const onlineCounts =
+    appointmentsByMonth.find(({ type }) => type === true)?.data || [];
+
+  const physicalCounts =
+    appointmentsByMonth.find(({ type }) => type === false)?.data || [];
+
   const months = [];
-  
+
   for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
     const monthDate = new Date(currentYear, monthIndex, 1);
-    const formattedDate = `${monthDate.getDate().toString().padStart(2, '0')}-${(monthDate.getMonth() + 1).toString().padStart(2, '0')}-${currentYear}`;
-  
+    const formattedDate = `${monthDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(monthDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${currentYear}`;
+
     months.push(formattedDate);
   }
-  
 
-  
+  //   total doctors, patients, booked appointments, complaints
+  const totalDoctors = await Doctor.countDocuments();
+  const totalPatients = await Patient.countDocuments();
+  const totalAppointments = await Appointment.countDocuments();
+  const totalComplaints = await Complaint.countDocuments();
 
+  // top specialties
 
-//   total doctors, patients, booked appointments, complaints
-const totalDoctors = await Doctor.countDocuments();
-const totalPatients = await Patient.countDocuments();
-const totalAppointments = await Appointment.countDocuments();
-const totalComplaints = await Complaint.countDocuments();
-
-
-// top specialties
-
-const specialtyQueryResult = await Doctor.aggregate([
+  const specialtyQueryResult = await Doctor.aggregate([
     { $group: { _id: "$speciality", count: { $sum: 1 } } },
-    { $sort: { count: -1 } }
+    { $sort: { count: -1 } },
   ]);
 
   const specialties = [];
   // const specialtiesCount = [];
 
   specialtyQueryResult.forEach((specialtyCount) => {
-    specialties.push({label: specialtyCount._id, value: specialtyCount.count});
+    specialties.push({
+      label: specialtyCount._id,
+      value: specialtyCount.count,
+    });
   });
 
+  //   top diseases
 
-//   top diseases
-
-const diseaseQueryResult = await Doctor.aggregate([
+  const diseaseQueryResult = await Doctor.aggregate([
     { $unwind: "$treatments" },
     { $group: { _id: "$treatments", count: { $sum: 1 } } },
     { $sort: { _id: 1 } },
-    {$limit: 15}
+    { $limit: 15 },
   ]);
 
-//   console.log(diseaseQueryResult);
+  //   console.log(diseaseQueryResult);
 
-const diseases = [];
-const diseasesCount = [];
+  const diseases = [];
+  const diseasesCount = [];
 
-diseaseQueryResult.forEach((diseaseCount) => {
-  diseases.push(diseaseCount._id);
-  diseasesCount.push(diseaseCount.count);
-});
-
-
+  diseaseQueryResult.forEach((diseaseCount) => {
+    diseases.push(diseaseCount._id);
+    diseasesCount.push(diseaseCount.count);
+  });
 
   // list of top doctors
 
   const doctorQueryResult = await Doctor.aggregate([
-    { $lookup: { from: 'reviews', localField: '_id', foreignField: 'doctor', as: 'reviews' } },
-    { $addFields: { avgRating: { $avg: '$reviews.ratings' }, reviewCount: { $size: '$reviews' } } },
+    {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "doctor",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        avgRating: { $avg: "$reviews.ratings" },
+        reviewCount: { $size: "$reviews" },
+      },
+    },
     { $sort: { avgRating: -1, reviewCount: -1 } },
-    { $limit: 10 }
-  ])
-  
+    { $limit: 10 },
+  ]);
+
   res.status(200).json({
     status: "success",
     data: {
       appointmentsByMonth,
-      online: Object.values(onlineCounts),
-      physical: Object.values(physicalCounts),
+      online: onlineCounts.length ? Object.values(onlineCounts) : [],
+      physical: physicalCounts.length ? Object.values(physicalCounts) : [],
       months,
       totalDoctors,
       totalPatients,
       totalAppointments,
       totalComplaints,
       specialties,
-         diseases,
-        diseasesCount,
-        topDoctors: doctorQueryResult,
+      diseases,
+      diseasesCount,
+      topDoctors: doctorQueryResult,
     },
   });
-  
-  })
+});
 
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const patients = await filterHandler(Patient, req.query);
 
-  exports.getAllUsers = catchAsync(async(req, res, next) => {
+  const doctors = await filterHandler(Doctor, req.query);
 
-    const patients = await filterHandler(Patient, req.query);
+  console.log(patients, doctors);
 
-    const doctors = await filterHandler(Doctor, req.query);
-    
-  
-    console.log(patients, doctors);
-
-    res.status(200).json({
-
-        status: "success",
-        data: {
-          users: [...patients, ...doctors],
-        },
-
-      });
-
+  res.status(200).json({
+    status: "success",
+    data: {
+      users: [...patients, ...doctors],
+    },
   });
+});
 
-  exports.getDoctorData = catchAsync(async(req, res) => {
+exports.getDoctorData = catchAsync(async (req, res) => {
+  const doctorId = req.params.id;
 
-    const doctorId = req.params.id;
+  const doctor = await Doctor.findById(doctorId).lean();
 
-      const doctor = await Doctor.findById(doctorId).lean();
-  
-      if (!doctor) {
-        return res.status(404).json({ error: 'Doctor not found' });
-      }
-  
-      const reviewCount = await Review.countDocuments({ doctor: doctorId });
-      const averageRating = await Review.aggregate([
-        { $match: { doctor: mongoose.Types.ObjectId(doctorId) } },
-        { $group: { _id: null, avgRating: { $avg: '$ratings' } } }
-      ]);
-  
-      const appointmentCount = await Appointment.aggregate([
-        { $match: { doctor: mongoose.Types.ObjectId(doctorId) } },
-        {
-          $group: {
-            _id: '$status',
-            count: { $sum: 1 }
-          }
-        }
-      ]);
-  
-      const appointments = {
-        completed: 0,
-        pending: 0,
-        cancelled: 0
-      };
-  
-      appointmentCount.forEach((item) => {
-        if (item._id === 'completed') {
-          appointments.completed = item.count;
-        } else if (item._id === 'pending') {
-          appointments.pending = item.count;
-        } else if (item._id === 'cancelled') {
-          appointments.cancelled = item.count;
-        }
-      });
-  
-      const result = {
-        ...doctor,
-        reviewCount,
-        averageRating: averageRating[0] ? averageRating[0].avgRating : 0,
-        appointments
-      };
-
-      res.status(200).json({
-        status: "success",
-        data: {
-          result,
-        },
-      });
-
-  });
-
-
-  const filterHandler = async(Model, query) => {
-
-     // To allow for nested GET reviews on tour (hack)
-     let filter = {};
-     // if (req.params.tourId) filter = { tour: req.params.tourId };
-    //  console.log(req.query);
- 
-     const features = new APIFeatures(Model.find(filter), query)
-       .filter()
-       .sort()
-       .limitFields()
-       .paginate();
-     // const doc = await features.query.explain();
-     const doc = await features.query;
- 
-    //  // SEND RESPONSE
-    //  res.status(200).json({
-    //    status: "success",
-    //    results: doc.length,
-    //    data: {
-    //      data: doc,
-    //    },
-    //  });
-
-
-    // return {
-    //     status: "success",
-    //     results: doc.length,
-    //     data: {
-    //       data: doc,
-    //     },
-    // }
-
-    return doc;
+  if (!doctor) {
+    return res.status(404).json({ error: "Doctor not found" });
   }
 
+  const reviewCount = await Review.countDocuments({ doctor: doctorId });
+  const averageRating = await Review.aggregate([
+    { $match: { doctor: mongoose.Types.ObjectId(doctorId) } },
+    { $group: { _id: null, avgRating: { $avg: "$ratings" } } },
+  ]);
 
-  exports.updateUser = catchAsync(async(req, res, next) => {
-
-    const {id} = req.params;
-
-    let user;
-
-    if(req.body.role === ROLES[0]) {
-      user = await Patient.findByIdAndUpdate(
-        id,
-        { $set: { ...req.body } },
-        {
-          new: true,
-        }
-      );
-    } else if(req.body.role === ROLES[1]) {
-      user = await Doctor.findByIdAndUpdate(
-        id,
-        { $set: { ...req.body } },
-        {
-          new: true,
-        }
-      );
-    }
-
-    res.status(200).json({
-      status: "success",
-      data: {
-        user,
+  const appointmentCount = await Appointment.aggregate([
+    { $match: { doctor: mongoose.Types.ObjectId(doctorId) } },
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
       },
-    });
+    },
+  ]);
+
+  const appointments = {
+    completed: 0,
+    pending: 0,
+    cancelled: 0,
+  };
+
+  appointmentCount.forEach((item) => {
+    if (item._id === "completed") {
+      appointments.completed = item.count;
+    } else if (item._id === "pending") {
+      appointments.pending = item.count;
+    } else if (item._id === "cancelled") {
+      appointments.cancelled = item.count;
+    }
   });
 
-exports.register = catchAsync(async(req, res, next) => {
+  const result = {
+    ...doctor,
+    reviewCount,
+    averageRating: averageRating[0] ? averageRating[0].avgRating : 0,
+    appointments,
+  };
 
-  const {name, email, password} = req.body;
+  res.status(200).json({
+    status: "success",
+    data: {
+      result,
+    },
+  });
+});
+
+const filterHandler = async (Model, query) => {
+  // To allow for nested GET reviews on tour (hack)
+  let filter = {};
+  // if (req.params.tourId) filter = { tour: req.params.tourId };
+  //  console.log(req.query);
+
+  const features = new APIFeatures(Model.find(filter), query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  // const doc = await features.query.explain();
+  const doc = await features.query;
+
+  //  // SEND RESPONSE
+  //  res.status(200).json({
+  //    status: "success",
+  //    results: doc.length,
+  //    data: {
+  //      data: doc,
+  //    },
+  //  });
+
+  // return {
+  //     status: "success",
+  //     results: doc.length,
+  //     data: {
+  //       data: doc,
+  //     },
+  // }
+
+  return doc;
+};
+
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+
+  let user;
+
+  if (req.body.role === ROLES[0]) {
+    user = await Patient.findByIdAndUpdate(
+      id,
+      { $set: { ...req.body } },
+      {
+        new: true,
+      }
+    );
+  } else if (req.body.role === ROLES[1]) {
+    user = await Doctor.findByIdAndUpdate(
+      id,
+      { $set: { ...req.body } },
+      {
+        new: true,
+      }
+    );
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+});
+
+exports.register = catchAsync(async (req, res, next) => {
+  const { name, email, password } = req.body;
 
   const admin = new Admin({
     name,
     email,
     password,
-    role: 'Admin',
+    role: "Admin",
   });
 
-
   await admin.save();
-
 
   res.status(200).json({
     status: "success",
     data: {
       admin,
     },
-  })
-
+  });
 });
 
+exports.login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
 
-exports.login = catchAsync(async(req, res, next) => {
+  const admin = await Admin.findOne({ email }).select("+password");
 
-  const {email, password} = req.body;
-
-  const admin = await Admin.findOne({email}).select('+password');
-
-  if(!admin || !(await matchEncryptions(password, admin.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+  if (!admin || !(await matchEncryptions(password, admin.password))) {
+    return next(new AppError("Incorrect email or password", 401));
   }
 
   createSendToken(admin, 200, req, res);
 });
 
-
-exports.getLoggedInAdmin = catchAsync(async(req, res, next) => {
-
+exports.getLoggedInAdmin = catchAsync(async (req, res, next) => {
   const user = req.user;
 
   return res.status(200).json({
@@ -376,14 +365,15 @@ exports.getLoggedInAdmin = catchAsync(async(req, res, next) => {
     data: {
       user,
     },
-  })
+  });
+});
 
-})
-
-exports.getUnresolvedData = catchAsync(async(req, res, next) => {
- 
-  const complaints = await Complaint.find({status: 'Pending'});
-  const appointments = await AppointmentRequest.find({isApproved: false, isRejected: false});
+exports.getUnresolvedData = catchAsync(async (req, res, next) => {
+  const complaints = await Complaint.find({ status: "Pending" });
+  const appointments = await AppointmentRequest.find({
+    isApproved: false,
+    isRejected: false,
+  });
 
   res.status(200).json({
     status: "success",
@@ -392,5 +382,4 @@ exports.getUnresolvedData = catchAsync(async(req, res, next) => {
       appointments,
     },
   });
-
 });

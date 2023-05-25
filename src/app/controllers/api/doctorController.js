@@ -51,7 +51,10 @@ const {
 const db = require("../../models");
 const gridfsFileStream = require("../../utils/helpers/gridfsFileStream");
 const { client, init, getClient } = require("../../utils/helpers/voximplant");
-const { notification: Notification, appointment: Appointment } = require("../../models");
+const {
+  notification: Notification,
+  appointment: Appointment,
+} = require("../../models");
 const Doctor = db.doctor;
 
 // method to verify the doctor PMC id and return pmc data to the client
@@ -200,7 +203,9 @@ exports.getDoctor = catchAsync(async (req, res, next) => {
   }
   res.status(200).json({
     success: true,
-    message: user.status.toLowerCase().includes("warn") ? "You have received a warning, kindly be more careful in future" : "Login successful",
+    message: user.status.toLowerCase().includes("warn")
+      ? "You have received a warning, kindly be more careful in future"
+      : "Login successful",
     data: {
       user,
     },
@@ -921,21 +926,17 @@ exports.addSignature = catchAsync(async (req, res, next) => {
   });
 });
 
-
-
-exports.requestAccess = catchAsync(async(req, res) => {
-
+exports.requestAccess = catchAsync(async (req, res) => {
   const user = req.user;
 
-  const {id} = req.params;
+  const { id } = req.params;
 
-  const notification = await Notification.findOne({user: id});
+  const notification = await Notification.findOne({ user: id });
 
   console.log(notification);
 
-  if(notification) {
-
-    console.log("sending notification")
+  if (notification) {
+    console.log("sending notification");
     await sendNotification(
       "New EHR access request",
       `Dr.${user.name} is requesting access to your electronic health records`,
@@ -944,7 +945,7 @@ exports.requestAccess = catchAsync(async(req, res) => {
       user._id,
       null,
       notification.tokenID
-    )
+    );
   }
 
   res.status(200).json({
@@ -956,37 +957,40 @@ exports.requestAccess = catchAsync(async(req, res) => {
   });
 });
 
-exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
- 
-  const {id} = req.params;
+exports.getDoctorDashboardData = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
 
   console.log(id);
 
-  const appointments = await Appointment.find({doctor: id, status: 'upcoming'});
-
+  const appointments = await Appointment.find({
+    doctor: id,
+    status: "upcoming",
+  });
 
   // get the count of appointments grouped by the patient location
   const appointmentsByLocation = await Appointment.aggregate([
     {
+      $match: {
+        doctor: mongoose.Types.ObjectId(id),
+      },
       $lookup: {
-        from: "patients",  // Replace "patients" with the actual name of the patient collection
+        from: "patients", // Replace "patients" with the actual name of the patient collection
         localField: "patient",
         foreignField: "_id",
-        as: "patientInfo"
-      }
+        as: "patientInfo",
+      },
     },
     {
       $group: {
         _id: "$patientInfo.location",
-        count: { $sum: 1 }
-      }
-    }
+        count: { $sum: 1 },
+      },
+    },
   ]);
 
   console.log(appointmentsByLocation);
 
-  
-  //get doctors payment 
+  //get doctors payment
 
   let payments = await stripe.stripeClient.paymentIntents.list({
     limit: 100,
@@ -996,15 +1000,27 @@ exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
     (payment) => payment.metadata.doctorId === id
   );
 
-
   const paymentsByMonth = calculateTotalAmountReceivedByMonth(payments);
 
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  console.log(paymentsByMonth);
 
-
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   const labels = Object.keys(paymentsByMonth).map((key) => {
-    return months[Number(key)-1]
+    return months[Number(key) - 1];
   });
 
   const data = Object.values(paymentsByMonth);
@@ -1022,38 +1038,34 @@ exports.getDoctorDashboardData = catchAsync(async(req, res, next) => {
         datasets: [
           {
             data: data,
-          }
-        ]
-      }
+          },
+        ],
+      },
     },
-
-  })
-
-
-})
-
+  });
+});
 
 // Function to calculate the total amount received for each month until the current month of the current year
 function calculateTotalAmountReceivedByMonth(paymentIntents) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1; // Month is 0-based index (January is 0)
-  
+
   const monthlyAmounts = {};
-  
+
   for (let i = 1; i <= currentMonth; i++) {
     monthlyAmounts[i] = 0;
   }
-  
-  paymentIntents.forEach(paymentIntent => {
+
+  paymentIntents.forEach((paymentIntent) => {
     const paymentDate = new Date(paymentIntent.created * 1000); // Convert Unix timestamp to milliseconds
     const paymentYear = paymentDate.getFullYear();
     const paymentMonth = paymentDate.getMonth() + 1;
-    
+
     if (paymentYear === currentYear && paymentMonth <= currentMonth) {
-      monthlyAmounts[paymentMonth] += paymentIntent.amount_received/100;
+      monthlyAmounts[paymentMonth] += paymentIntent.amount_received / 100;
     }
   });
-  
+
   return monthlyAmounts;
 }
