@@ -87,11 +87,13 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
     },
   ]);
 
-  const onlineCounts =
-    appointmentsByMonth.find(({ type }) => type === true)?.data || [];
+  const onlineCounts = appointmentsByMonth.find(
+    ({ type }) => type === true
+  )?.data;
 
-  const physicalCounts =
-    appointmentsByMonth.find(({ type }) => type === false)?.data || [];
+  const physicalCounts = appointmentsByMonth.find(
+    ({ type }) => type === false
+  )?.data;
 
   const months = [];
 
@@ -174,8 +176,12 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       appointmentsByMonth,
-      online: onlineCounts.length ? Object.values(onlineCounts) : [],
-      physical: physicalCounts.length ? Object.values(physicalCounts) : [],
+      online:
+        onlineCounts || onlineCounts.length ? Object.values(onlineCounts) : [],
+      physical:
+        physicalCounts || physicalCounts.length
+          ? Object.values(physicalCounts)
+          : [],
       months,
       totalDoctors,
       totalPatients,
